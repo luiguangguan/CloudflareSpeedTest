@@ -37,7 +37,7 @@ jobs:
       id: generate_tag
       run: |
         echo "RELEASE_TAG=v1.0.0-${{ github.run_id }}" >> $GITHUB_ENV
-        shell: bash
+      shell: bash
           
 
     - name: Create Release
