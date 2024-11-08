@@ -33,9 +33,9 @@ jobs:
         mkdir -p output
         go build -o output/CloudflareST.exe
 
-    - name: Generate Unique Tag
-      id: generate_tag
-      run: echo "RELEASE_TAG=v1.0.0-${{ github.run_id }}" >> $GITHUB_ENV
+        - name: Generate Unique Tag
+        id: generate_tag
+        run: echo "RELEASE_TAG=v1.0.0-${{ github.sha }}" >> $GITHUB_ENV      
 
     - name: Create Release
       id: create_release
