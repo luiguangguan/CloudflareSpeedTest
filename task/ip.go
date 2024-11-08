@@ -41,6 +41,11 @@ type IPRanges struct {
 	mask    string
 	firstIP net.IP
 	ipNet   *net.IPNet
+	ips2    []*IPPort // 存储 IP 地址和端口号的切片
+}
+type IPPort struct {
+	IP   *net.IPAddr // IP 地址
+	Port int         // 端口号
 }
 
 func newIPRanges() *IPRanges {
@@ -73,12 +78,13 @@ func (r *IPRanges) parseCIDR(ip string) {
 	}
 }
 
-func (r *IPRanges) appendIPv4(d byte) {
-	r.appendIP(net.IPv4(r.firstIP[12], r.firstIP[13], r.firstIP[14], d))
+func (r *IPRanges) appendIPv4(d byte, port int) {
+	r.appendIP(net.IPv4(r.firstIP[12], r.firstIP[13], r.firstIP[14], d), port)
 }
 
-func (r *IPRanges) appendIP(ip net.IP) {
+func (r *IPRanges) appendIP(ip net.IP, port int) {
 	r.ips = append(r.ips, &net.IPAddr{IP: ip})
+	r.ips2 = append(r.ips2, &IPPort{IP: &net.IPAddr{IP: ip}, Port: port})
 }
 
 // 返回第四段 ip 的最小值及可用数目
@@ -99,18 +105,18 @@ func (r *IPRanges) getIPRange() (minIP, hosts byte) {
 	return
 }
 
-func (r *IPRanges) chooseIPv4() {
+func (r *IPRanges) chooseIPv4(port int) {
 	if r.mask == "/32" { // 单个 IP 则无需随机，直接加入自身即可
-		r.appendIP(r.firstIP)
+		r.appendIP(r.firstIP, port)
 	} else {
 		minIP, hosts := r.getIPRange()    // 返回第四段 IP 的最小值及可用数目
 		for r.ipNet.Contains(r.firstIP) { // 只要该 IP 没有超出 IP 网段范围，就继续循环随机
 			if TestAll { // 如果是测速全部 IP
 				for i := 0; i <= int(hosts); i++ { // 遍历 IP 最后一段最小值到最大值
-					r.appendIPv4(byte(i) + minIP)
+					r.appendIPv4(byte(i)+minIP, port)
 				}
 			} else { // 随机 IP 的最后一段 0.0.0.X
-				r.appendIPv4(minIP + randIPEndWith(hosts))
+				r.appendIPv4(minIP+randIPEndWith(hosts), port)
 			}
 			r.firstIP[14]++ // 0.0.(X+1).X
 			if r.firstIP[14] == 0 {
@@ -123,9 +129,9 @@ func (r *IPRanges) chooseIPv4() {
 	}
 }
 
-func (r *IPRanges) chooseIPv6() {
+func (r *IPRanges) chooseIPv6(port int) {
 	if r.mask == "/128" { // 单个 IP 则无需随机，直接加入自身即可
-		r.appendIP(r.firstIP)
+		r.appendIP(r.firstIP, port)
 	} else {
 		var tempIP uint8                  // 临时变量，用于记录前一位的值
 		for r.ipNet.Contains(r.firstIP) { // 只要该 IP 没有超出 IP 网段范围，就继续循环随机
@@ -134,7 +140,7 @@ func (r *IPRanges) chooseIPv6() {
 
 			targetIP := make([]byte, len(r.firstIP))
 			copy(targetIP, r.firstIP)
-			r.appendIP(targetIP) // 加入 IP 地址池
+			r.appendIP(targetIP, port) // 加入 IP 地址池
 
 			for i := 13; i >= 0; i-- { // 从倒数第三位开始往前随机
 				tempIP = r.firstIP[i]              // 保存前一位的值
@@ -147,7 +153,7 @@ func (r *IPRanges) chooseIPv6() {
 	}
 }
 
-func loadIPRanges() []*net.IPAddr {
+func loadIPRanges() []*IPPort {
 	ranges := newIPRanges()
 	if IPText != "" { // 从参数中获取 IP 段数据
 		IPs := strings.Split(IPText, ",") // 以逗号分隔为数组并循环遍历
@@ -158,9 +164,9 @@ func loadIPRanges() []*net.IPAddr {
 			}
 			ranges.parseCIDR(IP) // 解析 IP 段，获得 IP、IP 范围、子网掩码
 			if isIPv4(IP) {      // 生成要测速的所有 IPv4 / IPv6 地址（单个/随机/全部）
-				ranges.chooseIPv4()
+				ranges.chooseIPv4(TCPPort)
 			} else {
-				ranges.chooseIPv6()
+				ranges.chooseIPv6(TCPPort)
 			}
 		}
 	} else { // 从文件中获取 IP 段数据
@@ -178,13 +184,28 @@ func loadIPRanges() []*net.IPAddr {
 			if line == "" {                           // 跳过空行
 				continue
 			}
-			ranges.parseCIDR(line) // 解析 IP 段，获得 IP、IP 范围、子网掩码
-			if isIPv4(line) {      // 生成要测速的所有 IPv4 / IPv6 地址（单个/随机/全部）
-				ranges.chooseIPv4()
+			// 按 `#` 分割字符串
+			parts := strings.Split(line, "#")
+			var port int = 0 // 端口号
+			// 假设 `parts` 是字符串数组
+			var err error // 在外部声明 err
+
+			// 判断长度是否大于 1
+			if len(parts) > 1 {
+				// 将第二个元素转换为 int
+				port, err = strconv.Atoi(parts[1])
+				if err != nil {
+					//.Println("转换失败:", err)
+					port = 0
+				}
+			}
+			ranges.parseCIDR(parts[0]) // 解析 IP 段，获得 IP、IP 范围、子网掩码
+			if isIPv4(line) {          // 生成要测速的所有 IPv4 / IPv6 地址（单个/随机/全部）
+				ranges.chooseIPv4(port)
 			} else {
-				ranges.chooseIPv6()
+				ranges.chooseIPv6(port)
 			}
 		}
 	}
-	return ranges.ips
+	return ranges.ips2
 }

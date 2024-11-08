@@ -126,11 +126,20 @@ https://github.com/XIU2/CloudflareSpeedTest
 }
 
 func main() {
+
+	dir, err := os.Getwd()
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	fmt.Println("当前运行目录:", dir)
+	//return
+
 	task.InitRandSeed() // 置随机数种子
 
 	fmt.Printf("# XIU2/CloudflareSpeedTest %s \n\n", version)
 
-	// 开始延迟测速 + 过滤延迟/丢包
+	// 开始延迟测速 + 过滤延迟/丢包 返回 []CloudflareIPData
 	pingData := task.NewPing().Run().FilterDelay().FilterLossRate()
 	// 开始下载测速
 	speedData := task.TestDownloadSpeed(pingData)
