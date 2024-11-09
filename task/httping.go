@@ -52,6 +52,9 @@ func (p *Ping) httping(ip *net.IPAddr, port int) (int, time.Duration) {
 		}
 		defer resp.Body.Close()
 
+		//实时Http状态码
+		p.bar.UpdateIPStatus(ip.String(), resp.StatusCode)
+
 		//fmt.Println("IP:", ip, "StatusCode:", resp.StatusCode, resp.Request.URL)
 		// 如果未指定的 HTTP 状态码，或指定的状态码不合规，则默认只认为 200、301、302 才算 HTTPing 通过
 		if HttpingStatusCode == 0 || HttpingStatusCode < 100 && HttpingStatusCode > 599 {
@@ -63,9 +66,6 @@ func (p *Ping) httping(ip *net.IPAddr, port int) (int, time.Duration) {
 				return 0, 0
 			}
 		}
-
-		//实时Http状态码
-		p.bar.UpdateIPStatus(ip.String(), resp.StatusCode)
 
 		io.Copy(io.Discard, resp.Body)
 
