@@ -57,7 +57,7 @@ func NewPing() *Ping {
 		ips2:    ips2,
 		csv:     make(utils.PingDelaySet, 0),
 		control: make(chan bool, Routines),
-		bar:     utils.NewBar(len(ips2), "可用:", ""),
+		bar:     utils.NewBar_httping(len(ips2), "可用:", ""),
 	}
 }
 
@@ -67,8 +67,10 @@ func (p *Ping) Run() utils.PingDelaySet {
 	}
 	if Httping {
 		fmt.Printf("开始延迟测速（模式：HTTP, 端口：%d, 范围：%v ~ %v ms, 丢包：%.2f)\n", TCPPort, utils.InputMinDelay.Milliseconds(), utils.InputMaxDelay.Milliseconds(), utils.InputMaxLossRate)
+		p.bar.UpdateOption("状态码")
 	} else {
 		fmt.Printf("开始延迟测速（模式：TCP, 端口：%d, 范围：%v ~ %v ms, 丢包：%.2f)\n", TCPPort, utils.InputMinDelay.Milliseconds(), utils.InputMaxDelay.Milliseconds(), utils.InputMaxLossRate)
+		p.bar.UpdateOption("延迟")
 	}
 	for _, ip := range p.ips2 {
 		p.wg.Add(1)
@@ -120,6 +122,8 @@ func (p *Ping) checkConnection(ip *net.IPAddr, port int) (recv int, totalDelay t
 		if ok, delay := p.tcping(ip, port); ok {
 			recv++
 			totalDelay += delay
+			//实时延迟
+			p.bar.UpdateIPStatus(ip.String(), int(delay.Milliseconds()))
 		}
 	}
 	return

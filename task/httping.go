@@ -3,6 +3,7 @@ package task
 import (
 	//"crypto/tls"
 	//"fmt"
+
 	"io"
 	"log"
 	"net"
@@ -62,6 +63,9 @@ func (p *Ping) httping(ip *net.IPAddr, port int) (int, time.Duration) {
 				return 0, 0
 			}
 		}
+
+		//实时Http状态码
+		p.bar.UpdateIPStatus(ip.String(), resp.StatusCode)
 
 		io.Copy(io.Discard, resp.Body)
 

@@ -72,9 +72,11 @@ func TestDownloadSpeed(ipSet utils.PingDelaySet) (speedSet utils.DownloadSpeedSe
 	for i := 0; i < bar_a; i++ {
 		bar_b += " "
 	}
-	bar := utils.NewBar(TestCount, bar_b, "")
+
+	bar := utils.NewBar_download(TestCount, bar_b, "")
 	for i := 0; i < testNum; i++ {
-		speed := downloadHandler(ipSet[i].IP, ipSet[i].Port)
+		bar.UpdateIPSpeed(ipSet[i].IP.String(), 0)
+		speed := downloadHandler(ipSet[i].IP, ipSet[i].Port, bar)
 		ipSet[i].DownloadSpeed = speed
 		// 在每个 IP 下载测速后，以 [下载速度下限] 条件过滤结果
 		if speed >= MinSpeed*1024*1024 {
@@ -107,7 +109,7 @@ func getDialContext(ip *net.IPAddr, port int) func(ctx context.Context, network,
 }
 
 // return download Speed
-func downloadHandler(ip *net.IPAddr, port int) float64 {
+func downloadHandler(ip *net.IPAddr, port int, bar *utils.Bar) float64 {
 	client := &http.Client{
 		Transport: &http.Transport{DialContext: getDialContext(ip, port)},
 		Timeout:   Timeout,
@@ -160,7 +162,12 @@ func downloadHandler(ip *net.IPAddr, port int) float64 {
 			nextTime = timeStart.Add(timeSlice * time.Duration(timeCounter))
 			e.Add(float64(contentRead - lastContentRead))
 			lastContentRead = contentRead
+			// 计算并显示实时下载速度
+			realSpeed := float64(contentRead) / currentTime.Sub(timeStart).Seconds()
+			speed := realSpeed / 1024 / 1024 // 输出实时速度
+			bar.UpdateDownloadSpeed(speed)
 		}
+
 		// 如果超出下载测速时间，则退出循环（终止测速）
 		if currentTime.After(timeEnd) {
 			break
@@ -172,12 +179,9 @@ func downloadHandler(ip *net.IPAddr, port int) float64 {
 			} else if contentLength == -1 { // 文件下载完成 且 文件大小未知，则退出循环（终止测速），例如：https://speed.cloudflare.com/__down?bytes=200000000 这样的，如果在 10 秒内就下载完成了，会导致测速结果明显偏低甚至显示为 0.00（下载速度太快时）
 				break
 			}
-			// 获取上个时间片
-			last_time_slice := timeStart.Add(timeSlice * time.Duration(timeCounter-1))
-			// 下载数据量 / (用当前时间 - 上个时间片/ 时间片)
-			e.Add(float64(contentRead-lastContentRead) / (float64(currentTime.Sub(last_time_slice)) / float64(timeSlice)))
 		}
 		contentRead += int64(bufferRead)
 	}
+	// 返回最终的平均下载速度
 	return e.Value() / (Timeout.Seconds() / 120)
 }
