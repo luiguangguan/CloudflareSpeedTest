@@ -7,7 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  Windows:
+    name: windows
     runs-on: windows-latest
 
     steps:
@@ -59,3 +60,56 @@ jobs:
         asset_content_type: application/octet-stream
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  Linux :
+    name: Linux
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Go 1.22.6
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.22.6'
+
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          **/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Build
+      run: |
+        mkdir -p output
+        go build -o output/CloudflareST
+
+    - name: Generate Unique Tag
+      id: generate_tag
+      run: echo "RELEASE_TAG=v1.0.0-${{ github.run_id }}" >> $GITHUB_ENV
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ env.RELEASE_TAG }}
+        release_name: Release ${{ env.RELEASE_TAG }}
+        body: Release body
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./output/CloudflareST
+        asset_name: Linux_CloudflareST
+        asset_content_type: application/octet-stream
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
