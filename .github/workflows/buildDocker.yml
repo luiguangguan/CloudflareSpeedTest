@@ -35,7 +35,7 @@ jobs:
       env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       run: |
-          IMAGE_ID=$DOCKER_USERNAME/$IMAGE_NAME_${{ github.run_id }}
+          IMAGE_ID=$DOCKER_USERNAME/$IMAGE_NAME
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
       
           # 从 GitHub 事件负载中获取分支名
@@ -47,5 +47,5 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           echo VERSION=$VERSION
       
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION_${{ github.run_id }}
           docker push $IMAGE_ID:$VERSION
