@@ -13,8 +13,8 @@ RUN go mod download
 # 複製其餘代碼文件
 COPY . .
 
-# 編譯 Go 應用
-RUN go build -o CloudflareSpeedTest
+# 編譯 Go 應用，設置目標平台為 linux/amd64
+RUN GOARCH=amd64 GOOS=linux go build -o CloudflareSpeedTest
 
 # 第二階段：運行階段
 FROM alpine:3.20
@@ -27,7 +27,7 @@ ENV TZ=Asia/Shanghai
 WORKDIR /app
 
 # 複製編譯後的二進制文件到運行映像
-COPY --from=builder /app/CloudflareSpeedTest .
+COPY --from=builder /app/CloudflareSpeedTest /app/CloudflareSpeedTest
 
 # 設置執行權限
 RUN chmod +x /app/CloudflareSpeedTest
