@@ -19,6 +19,9 @@ RUN GOARCH=amd64 GOOS=linux go build -o CloudflareSpeedTest
 # 第二階段：運行階段
 FROM alpine:3.20
 
+# 安裝 glibc 兼容庫（如果需要）
+RUN apk --no-cache add libc6-compat
+
 # 設置字符編碼和時區（可選）
 ENV LANG=C.UTF-8
 ENV TZ=Asia/Shanghai
