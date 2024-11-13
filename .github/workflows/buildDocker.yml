@@ -1,0 +1,51 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main  # 當推送到 main 分支時觸發
+  workflow_dispatch:  # 添加手动触发的功能
+  
+env:
+    IMAGE_NAME: cloudflarespeedtest
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 檢出代碼
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # # 設置 Docker 環境
+    # - name: Set up Docker Buildx
+    #   uses: docker/setup-buildx-action@v2
+
+    - name: 构建镜像
+      run: docker build . --file Dockerfile --tag $IMAGE_NAME
+
+    # 登錄到 Docker Hub
+    - name:  登录到镜像仓库
+      env:
+            DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+            ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: echo $ACCESS_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin
+
+    - name: 推送镜像
+    env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+    run: |
+        IMAGE_ID=$DOCKER_USERNAME/$IMAGE_NAME
+        IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+        # 从 GitHub 事件负载中获取分支名
+        BRANCH_NAME=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+        # 对于 "master" 分支和标签，使用 "latest" 版本号
+        VERSION=$(if [ "$BRANCH_NAME" == "master" ]; then echo "latest"; else echo $BRANCH_NAME; fi)
+
+        echo IMAGE_ID=$IMAGE_ID
+        echo VERSION=$VERSION
+
+        docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+        docker push $IMAGE_ID:$VERSION

@@ -75,7 +75,7 @@ func (p *Ping) Run() utils.PingDelaySet {
 	for _, ip := range p.ips2 {
 		p.wg.Add(1)
 		p.control <- false
-		go p.start(ip.IP, ip.Port)
+		go p.start(ip.IP, ip.Port, ip.Remark)
 	}
 	p.wg.Wait()
 	p.bar.Done()
@@ -83,9 +83,9 @@ func (p *Ping) Run() utils.PingDelaySet {
 	return p.csv
 }
 
-func (p *Ping) start(ip *net.IPAddr, port int) {
+func (p *Ping) start(ip *net.IPAddr, port int, remark string) {
 	defer p.wg.Done()
-	p.tcpingHandler(ip, port)
+	p.tcpingHandler(ip, port, remark)
 	<-p.control
 }
 
@@ -138,7 +138,7 @@ func (p *Ping) appendIPData(data *utils.PingData) {
 }
 
 // handle tcping
-func (p *Ping) tcpingHandler(ip *net.IPAddr, port int) {
+func (p *Ping) tcpingHandler(ip *net.IPAddr, port int, remark string) {
 	recv, totalDlay := p.checkConnection(ip, port)
 	nowAble := len(p.csv)
 	if recv != 0 {
@@ -154,6 +154,7 @@ func (p *Ping) tcpingHandler(ip *net.IPAddr, port int) {
 		Received: recv,
 		Delay:    totalDlay / time.Duration(recv),
 		Port:     port,
+		Remark:   remark,
 	}
 	p.appendIPData(data)
 }

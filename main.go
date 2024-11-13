@@ -11,10 +11,13 @@ import (
 
 	"github.com/XIU2/CloudflareSpeedTest/task"
 	"github.com/XIU2/CloudflareSpeedTest/utils"
+	"github.com/robfig/cron/v3"
 )
 
 var (
 	version, versionNew string
+	// cronExpr := "*/1 * * * *" // 每 1 分钟执行一次
+	cronExpr string
 )
 
 func init() {
@@ -73,8 +76,15 @@ https://github.com/XIU2/CloudflareSpeedTest
     -h
         打印帮助说明
 `
+	var configFile string
+
 	var minDelay, maxDelay, downloadTime int
 	var maxLossRate float64
+
+	flag.StringVar(&configFile, "c", "", "配置文件路径")
+	flag.StringVar(&cronExpr, "cron", "", "计划任务")
+
+	fmt.Print("命令行读取参数")
 	flag.IntVar(&task.Routines, "n", 200, "延迟测速线程")
 	flag.IntVar(&task.PingTimes, "t", 4, "延迟测速次数")
 	flag.IntVar(&task.TestCount, "dn", 10, "下载测速数量")
@@ -100,8 +110,51 @@ https://github.com/XIU2/CloudflareSpeedTest
 	flag.BoolVar(&task.TestAll, "allip", false, "测速全部 IP")
 
 	flag.BoolVar(&printVersion, "v", false, "打印程序版本")
+
+	flag.StringVar(&utils.DbFile, "db", "data.db", "SqlLite数据库文件")
+
 	flag.Usage = func() { fmt.Print(help) }
 	flag.Parse()
+
+	// 如果提供了 -c 参数，则读取配置文件
+	fmt.Print(configFile)
+	if configFile != "" {
+		fileConfig, err := utils.LoadConfig(configFile)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "加载配置文件出错: %v\n", err)
+			os.Exit(1)
+		} else {
+			ApplyConfigDefaults(fileConfig)
+		}
+
+	}
+
+	{
+		fmt.Println("命令行读取参数：")
+		fmt.Printf("配置文件路径 (-c): %s\n", configFile)
+		fmt.Printf("计划任务 (-cron): %s\n", cronExpr)
+		fmt.Printf("延迟测速线程 (-n): %d\n", task.Routines)
+		fmt.Printf("延迟测速次数 (-t): %d\n", task.PingTimes)
+		fmt.Printf("下载测速数量 (-dn): %d\n", task.TestCount)
+		fmt.Printf("下载测速时间 (-dt): %d\n", downloadTime)
+		fmt.Printf("指定测速端口 (-tp): %d\n", task.TCPPort)
+		fmt.Printf("指定测速地址 (-url): %s\n", task.URL)
+		fmt.Printf("切换测速模式 (-httping): %t\n", task.Httping)
+		fmt.Printf("有效状态代码 (-httping-code): %d\n", task.HttpingStatusCode)
+		fmt.Printf("匹配指定地区 (-cfcolo): %s\n", task.HttpingCFColo)
+		fmt.Printf("平均延迟上限 (-tl): %d\n", maxDelay)
+		fmt.Printf("平均延迟下限 (-tll): %d\n", minDelay)
+		fmt.Printf("丢包几率上限 (-tlr): %f\n", maxLossRate)
+		fmt.Printf("下载速度下限 (-sl): %f\n", task.MinSpeed)
+		fmt.Printf("显示结果数量 (-p): %d\n", utils.PrintNum)
+		fmt.Printf("IP段数据文件 (-f): %s\n", task.IPFile)
+		fmt.Printf("指定IP段数据 (-ip): %s\n", task.IPText)
+		fmt.Printf("输出结果文件 (-o): %s\n", utils.Output)
+		fmt.Printf("禁用下载测速 (-dd): %t\n", task.Disable)
+		fmt.Printf("测速全部 IP (-allip): %t\n", task.TestAll)
+		fmt.Printf("打印程序版本 (-v): %t\n", printVersion)
+		fmt.Printf("SqlLite数据库文件 (-db): %s\n", utils.DbFile)
+	}
 
 	if task.MinSpeed > 0 && time.Duration(maxDelay)*time.Millisecond == utils.InputMaxDelay {
 		fmt.Println("[小提示] 在使用 [-sl] 参数时，建议搭配 [-tl] 参数，以避免因凑不够 [-dn] 数量而一直测速...")
@@ -133,11 +186,39 @@ func main() {
 		return
 	}
 	fmt.Println("当前运行目录:", dir)
-	//return
+	// return
 
-	task.InitRandSeed() // 置随机数种子
+	// task.InitRandSeed() // 置随机数种子
 
 	fmt.Printf("# XIU2/CloudflareSpeedTest %s \n\n", version)
+
+	if versionNew != "" {
+		fmt.Printf("\n*** 发现新版本 [%s]！请前往 [https://github.com/XIU2/CloudflareSpeedTest] 更新！ ***\n", versionNew)
+	}
+
+	if cronExpr != "" {
+		// 创建新的 cron 调度器
+		c := cron.New()
+
+		// 配置 cron 表达式
+		_, err2 := c.AddFunc(cronExpr, TestSpeed)
+		if err2 != nil {
+			fmt.Println("Error adding cron job:", err2)
+			return
+		}
+		// 启动调度器
+		c.Start()
+		defer c.Stop()
+		// 防止主程序退出
+		select {} // 可以用通道或其他方式阻止退出
+	} else {
+		TestSpeed()
+	}
+
+	endPrint()
+}
+
+func TestSpeed() {
 
 	// 开始延迟测速 + 过滤延迟/丢包 返回 []CloudflareIPData
 	pingData := task.NewPing().Run().FilterDelay().FilterLossRate()
@@ -145,11 +226,80 @@ func main() {
 	speedData := task.TestDownloadSpeed(pingData)
 	utils.ExportCsv(speedData) // 输出文件
 	speedData.Print()          // 打印结果
-
-	if versionNew != "" {
-		fmt.Printf("\n*** 发现新版本 [%s]！请前往 [https://github.com/XIU2/CloudflareSpeedTest] 更新！ ***\n", versionNew)
+	for _, data := range speedData {
+		utils.Save(&data)
+		// fmt.Printf("%d", rw)
 	}
-	endPrint()
+}
+
+// ApplyConfigDefaults will update the task and utils config with the values from the fileConfig
+func ApplyConfigDefaults(_fileConfig *utils.Config) {
+	// Update task configuration
+	if _fileConfig.Routines != 0 {
+		task.Routines = _fileConfig.Routines
+	}
+	if _fileConfig.PingTimes != 0 {
+		task.PingTimes = _fileConfig.PingTimes
+	}
+	if _fileConfig.TestCount != 0 {
+		task.TestCount = _fileConfig.TestCount
+	}
+	if _fileConfig.DownloadTime != 0 {
+		task.Timeout = time.Duration(_fileConfig.DownloadTime) * time.Second
+	}
+	if _fileConfig.TCPPort != 0 {
+		task.TCPPort = _fileConfig.TCPPort
+	}
+	if _fileConfig.URL != "" {
+		task.URL = _fileConfig.URL
+	}
+	if _fileConfig.Httping {
+		task.Httping = _fileConfig.Httping
+	}
+	if _fileConfig.HttpingStatusCode != 0 {
+		task.HttpingStatusCode = _fileConfig.HttpingStatusCode
+	}
+	if _fileConfig.HttpingCFColo != "" {
+		task.HttpingCFColo = _fileConfig.HttpingCFColo
+	}
+	if _fileConfig.MaxDelay != 0 {
+		utils.InputMaxDelay = time.Duration(_fileConfig.MaxDelay) * time.Millisecond
+	}
+	if _fileConfig.MinDelay != 0 {
+		utils.InputMinDelay = time.Duration(_fileConfig.MinDelay) * time.Millisecond
+	}
+	if _fileConfig.MaxLossRate != 0 {
+		utils.InputMaxLossRate = float32(_fileConfig.MaxLossRate)
+	}
+	if _fileConfig.MinSpeed != 0 {
+		task.MinSpeed = _fileConfig.MinSpeed
+	}
+
+	// Update utils configuration
+	if _fileConfig.PrintNum != 0 {
+		utils.PrintNum = _fileConfig.PrintNum
+	}
+	if _fileConfig.IPFile != "" {
+		task.IPFile = _fileConfig.IPFile
+	}
+	if _fileConfig.IPText != "" {
+		task.IPText = _fileConfig.IPText
+	}
+	if _fileConfig.Output != "" {
+		utils.Output = _fileConfig.Output
+	}
+	if _fileConfig.Disable {
+		task.Disable = _fileConfig.Disable
+	}
+	if _fileConfig.TestAll {
+		task.TestAll = _fileConfig.TestAll
+	}
+	if _fileConfig.DbFile != "" {
+		utils.DbFile = _fileConfig.DbFile
+	}
+	if _fileConfig.CronExpr != "" {
+		cronExpr = _fileConfig.CronExpr
+	}
 }
 
 func endPrint() {
