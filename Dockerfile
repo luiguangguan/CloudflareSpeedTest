@@ -35,6 +35,9 @@ COPY --from=builder /app/CloudflareSpeedTest /app/CloudflareSpeedTest
 # 設置執行權限
 RUN chmod +x /app/CloudflareSpeedTest
 
+# 創建目錄
+RUN mkdir /config/
+
 # 複製默認配置文件到 /config 目錄
 COPY config.json /config/config.json
 
