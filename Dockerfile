@@ -29,6 +29,9 @@ WORKDIR /app
 # 複製編譯後的二進制文件到運行映像
 COPY --from=builder /app/CloudflareSpeedTest .
 
+# 設置執行權限
+RUN chmod +x /app/CloudflareSpeedTest
+
 # 複製默認配置文件到 /config 目錄
 COPY config.json /config/config.json
 
@@ -36,4 +39,4 @@ COPY config.json /config/config.json
 VOLUME ["/config", "/data"]
 
 # 設置默認執行命令
-CMD ["./CloudflareSpeedTest", "-c", "/config/config.json"]
+CMD ["/app/CloudflareSpeedTest", "-c", "/config/config.json"]
