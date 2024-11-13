@@ -29,23 +29,23 @@ jobs:
       env:
             DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
             ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        run: echo $ACCESS_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin
+      run: echo $ACCESS_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin
 
     - name: 推送镜像
-    env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-    run: |
-        IMAGE_ID=$DOCKER_USERNAME/$IMAGE_NAME
-        IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-
-        # 从 GitHub 事件负载中获取分支名
-        BRANCH_NAME=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-        # 对于 "master" 分支和标签，使用 "latest" 版本号
-        VERSION=$(if [ "$BRANCH_NAME" == "master" ]; then echo "latest"; else echo $BRANCH_NAME; fi)
-
-        echo IMAGE_ID=$IMAGE_ID
-        echo VERSION=$VERSION
-
-        docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-        docker push $IMAGE_ID:$VERSION
+      env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      run: |
+          IMAGE_ID=$DOCKER_USERNAME/$IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+      
+          # 从 GitHub 事件负载中获取分支名
+          BRANCH_NAME=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+      
+          # 对于 "master" 分支和标签，使用 "latest" 版本号
+          VERSION=$(if [ "$BRANCH_NAME" == "master" ]; then echo "latest"; else echo $BRANCH_NAME; fi)
+      
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+      
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
