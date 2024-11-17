@@ -204,7 +204,7 @@ func main() {
 		c := cron.New()
 
 		// 配置 cron 表达式
-		_, err2 := c.AddFunc(cronExpr, TestSpeed)
+		_, err2 := c.AddFunc(cronExpr, test)
 		if err2 != nil {
 			fmt.Println("Error adding cron job:", err2)
 			return
@@ -219,6 +219,11 @@ func main() {
 	}
 
 	endPrint()
+}
+
+func test() {
+	fmt.Printf(currentTime.Format("2006-01-02 15:04:05"))
+	fmt.Printf(cronExpr)
 }
 
 func TestSpeed() {
