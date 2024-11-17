@@ -45,7 +45,8 @@ jobs:
           VERSION=$(if [ "$BRANCH_NAME" == "master" ]; then echo "latest"; else echo $BRANCH_NAME; fi)
       
           echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION.${{ github.run_id }}
+          # echo VERSION=$VERSION.${{ github.run_id }}
+          echo VERSION=$VERSION
       
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
