@@ -222,7 +222,8 @@ func main() {
 }
 
 func test() {
-	fmt.Printf(currentTime.Format("2006-01-02 15:04:05"))
+	n := time.Now().Format("2006-01-02 15:04:05")
+	fmt.Printf(n)
 	fmt.Printf(cronExpr)
 }
 
