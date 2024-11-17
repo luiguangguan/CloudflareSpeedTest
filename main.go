@@ -182,7 +182,7 @@ https://github.com/XIU2/CloudflareSpeedTest
 }
 
 func main() {
-
+	fmt.Printf("-------------------------------新版3.0----------------------------------------------")
 	dir, err := os.Getwd()
 	if err != nil {
 		fmt.Println("Error:", err)
