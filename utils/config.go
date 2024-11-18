@@ -26,7 +26,7 @@ type Config struct {
 	Disable           bool    `json:"dd"`
 	TestAll           bool    `json:"allip"`
 	DbFile            string  `json:"db"`
-	CronExpr          string  `json:cron`
+	CronExpr          string  `json:"cron"`
 }
 
 // LoadConfig reads a JSON configuration file and returns a Config struct

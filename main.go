@@ -128,6 +128,9 @@ https://github.com/XIU2/CloudflareSpeedTest
 			os.Exit(1)
 		} else {
 			ApplyConfigDefaults(fileConfig)
+			fmt.Printf("---------------cronExpr--------------------------")
+			fmt.Printf(fileConfig.CronExpr)
+
 		}
 
 	}
