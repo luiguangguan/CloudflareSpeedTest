@@ -204,7 +204,7 @@ func main() {
 		c := cron.New(cron.WithSeconds())
 
 		// 配置 cron 表达式
-		_, err2 := c.AddFunc(cronExpr, func{
+		_, err2 := c.AddFunc(cronExpr, func() {
 			fmt.Println("task starting")
 		})
 		if err2 != nil {
