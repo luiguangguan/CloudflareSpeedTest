@@ -24,7 +24,7 @@ RUN apk --no-cache add libc6-compat
 
 RUN apk --no-cache add tzdata \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    #&& echo "Asia/Shanghai" > /etc/timezone
+    && echo "Asia/Shanghai" > /etc/timezone
 
 # 設置字符編碼和時區（可選）
 ENV LANG=C.UTF-8
