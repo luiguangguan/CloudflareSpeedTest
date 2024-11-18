@@ -22,9 +22,17 @@ FROM alpine:3.20
 # 安裝 glibc 兼容庫（如果需要）
 RUN apk --no-cache add libc6-compat
 
+RUN apk --no-cache add tzdata \
+    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    #&& echo "Asia/Shanghai" > /etc/timezone
+
 # 設置字符編碼和時區（可選）
 ENV LANG=C.UTF-8
 ENV TZ=Asia/Shanghai
+
+# 创建设置时区的入口脚本
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # 設置工作目錄
 WORKDIR /app
@@ -43,6 +51,8 @@ COPY config.json /config/config.json
 
 # 設置可映射的配置和數據目錄
 VOLUME ["/config", "/data"]
+
+ENTRYPOINT ["/entrypoint.sh"]
 
 # 設置默認執行命令
 CMD ["/app/CloudflareSpeedTest", "-c", "/config/config.json"]
