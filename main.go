@@ -201,7 +201,7 @@ func main() {
 
 	if cronExpr != "" {
 		// 创建新的 cron 调度器
-		c := cron.New()
+		c := cron.New(cron.WithSeconds())
 
 		// 配置 cron 表达式
 		_, err2 := c.AddFunc(cronExpr, func() {
