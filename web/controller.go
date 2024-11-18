@@ -12,3 +12,12 @@ func GetProcessDownloadBar() int64 {
 		return current
 	}
 }
+
+func GetProcessDelayBar() int64 {
+	if task.DownloadBar == nil {
+		return -1
+	} else {
+		current := task.DelayBar.Current()
+		return current
+	}
+}
