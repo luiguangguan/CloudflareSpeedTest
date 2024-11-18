@@ -182,7 +182,7 @@ https://github.com/XIU2/CloudflareSpeedTest
 }
 
 func main() {
-	fmt.Printf("-------------------------------新版3.0----------------------------------------------")
+	fmt.Printf("-------------------------------新版3.1----------------------------------------------")
 	dir, err := os.Getwd()
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -309,9 +309,10 @@ func ApplyConfigDefaults(_fileConfig *utils.Config) {
 	if _fileConfig.DbFile != "" {
 		utils.DbFile = _fileConfig.DbFile
 	}
-	if _fileConfig.CronExpr != "" {
-		cronExpr = _fileConfig.CronExpr
-	}
+	cronExpr = _fileConfig.CronExpr
+	// if _fileConfig.CronExpr != "" {
+	// 	cronExpr = _fileConfig.CronExpr
+	// }
 }
 
 func endPrint() {
