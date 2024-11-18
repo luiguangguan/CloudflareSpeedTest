@@ -204,7 +204,7 @@ func main() {
 		c := cron.New()
 
 		// 配置 cron 表达式
-		_, err2 := c.AddFunc(cronExpr, TestSpeed)
+		_, err2 := c.AddFunc(cronExpr, test)
 		if err2 != nil {
 			fmt.Println("Error adding cron job:", err2)
 			return
@@ -219,6 +219,15 @@ func main() {
 	}
 
 	endPrint()
+}
+
+func test() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	fmt.Println("Task started at", time.Now())
+	time.Sleep(130 * time.Second) // 模拟任务执行时间
+	fmt.Println("Task completed at", time.Now())
 }
 
 func TestSpeed() {
