@@ -25,6 +25,11 @@ jobs:
       run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
     # 登錄到 Docker Hub
+    - name:  登录到镜像仓库
+      env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      run: echo $ACCESS_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin
     - name: 推送镜像
       env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
