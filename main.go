@@ -128,8 +128,6 @@ https://github.com/XIU2/CloudflareSpeedTest
 			os.Exit(1)
 		} else {
 			ApplyConfigDefaults(fileConfig)
-			fmt.Printf("---------------cronExpr--------------------------")
-			fmt.Printf(fileConfig.CronExpr)
 
 		}
 
@@ -185,7 +183,6 @@ https://github.com/XIU2/CloudflareSpeedTest
 }
 
 func main() {
-	fmt.Printf("-------------------------------新版3.1----------------------------------------------")
 	dir, err := os.Getwd()
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -207,7 +204,7 @@ func main() {
 		c := cron.New()
 
 		// 配置 cron 表达式
-		_, err2 := c.AddFunc(cronExpr, test)
+		_, err2 := c.AddFunc(cronExpr, TestSpeed)
 		if err2 != nil {
 			fmt.Println("Error adding cron job:", err2)
 			return
@@ -222,12 +219,6 @@ func main() {
 	}
 
 	endPrint()
-}
-
-func test() {
-	n := time.Now().Format("2006-01-02 15:04:05")
-	fmt.Printf(n)
-	fmt.Printf(cronExpr)
 }
 
 func TestSpeed() {
@@ -312,10 +303,9 @@ func ApplyConfigDefaults(_fileConfig *utils.Config) {
 	if _fileConfig.DbFile != "" {
 		utils.DbFile = _fileConfig.DbFile
 	}
-	cronExpr = _fileConfig.CronExpr
-	// if _fileConfig.CronExpr != "" {
-	// 	cronExpr = _fileConfig.CronExpr
-	// }
+	if _fileConfig.CronExpr != "" {
+		cronExpr = _fileConfig.CronExpr
+	}
 }
 
 func endPrint() {
