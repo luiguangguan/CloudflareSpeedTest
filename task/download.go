@@ -29,8 +29,9 @@ var (
 	Timeout = defaultTimeout
 	Disable = defaultDisableDownload
 
-	TestCount = defaultTestNum
-	MinSpeed  = defaultMinSpeed
+	TestCount   = defaultTestNum
+	MinSpeed    = defaultMinSpeed
+	DownloadBar *utils.Bar
 )
 
 func checkDownloadDefault() {
@@ -73,21 +74,21 @@ func TestDownloadSpeed(ipSet utils.PingDelaySet) (speedSet utils.DownloadSpeedSe
 		bar_b += " "
 	}
 
-	bar := utils.NewBar_download(TestCount, bar_b, "")
+	DownloadBar := utils.NewBar_download(TestCount, bar_b, "")
 	for i := 0; i < testNum; i++ {
-		bar.UpdateIPSpeed(ipSet[i].IP.String(), 0)
-		speed := downloadHandler(ipSet[i].IP, ipSet[i].Port, bar)
+		DownloadBar.UpdateIPSpeed(ipSet[i].IP.String(), 0)
+		speed := downloadHandler(ipSet[i].IP, ipSet[i].Port, DownloadBar)
 		ipSet[i].DownloadSpeed = speed
 		// 在每个 IP 下载测速后，以 [下载速度下限] 条件过滤结果
 		if speed >= MinSpeed*1024*1024 {
-			bar.Grow(1, "")
+			DownloadBar.Grow(1, "")
 			speedSet = append(speedSet, ipSet[i]) // 高于下载速度下限时，添加到新数组中
 			if len(speedSet) == TestCount {       // 凑够满足条件的 IP 时（下载测速数量 -dn），就跳出循环
 				break
 			}
 		}
 	}
-	bar.Done()
+	DownloadBar.Done()
 	if len(speedSet) == 0 { // 没有符合速度限制的数据，返回所有测试数据
 		speedSet = utils.DownloadSpeedSet(ipSet)
 	}

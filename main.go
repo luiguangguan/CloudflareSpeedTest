@@ -12,6 +12,7 @@ import (
 
 	"github.com/XIU2/CloudflareSpeedTest/task"
 	"github.com/XIU2/CloudflareSpeedTest/utils"
+	"github.com/XIU2/CloudflareSpeedTest/web"
 	"github.com/robfig/cron/v3"
 )
 
@@ -191,13 +192,16 @@ func main() {
 	fmt.Println("当前运行目录:", dir)
 	// return
 
-	// task.InitRandSeed() // 置随机数种子
+	task.InitRandSeed() // 置随机数种子
 
 	fmt.Printf("# XIU2/CloudflareSpeedTest %s \n\n", version)
 
 	if versionNew != "" {
 		fmt.Printf("\n*** 发现新版本 [%s]！请前往 [https://github.com/XIU2/CloudflareSpeedTest] 更新！ ***\n", versionNew)
 	}
+
+	// 启动web服务
+	web.Start()
 
 	if cronExpr != "" {
 		// 创建新的 cron 调度器

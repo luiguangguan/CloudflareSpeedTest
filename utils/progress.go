@@ -57,3 +57,7 @@ func (b *Bar) UpdateOption(Option string) {
 func (b *Bar) Done() {
 	b.pb.Finish()
 }
+
+func (b *Bar) Current() int64 {
+	return b.pb.Current()
+}
