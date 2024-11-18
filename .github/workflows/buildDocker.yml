@@ -25,12 +25,6 @@ jobs:
       run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
     # 登錄到 Docker Hub
-    - name:  登录到镜像仓库
-      env:
-            DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-            ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-      run: echo $ACCESS_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin
-
     - name: 推送镜像
       env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -41,12 +35,16 @@ jobs:
           # 从 GitHub 事件负载中获取分支名
           BRANCH_NAME=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
       
-          # 对于 "master" 分支和标签，使用 "latest" 版本号
-          VERSION=$(if [ "$BRANCH_NAME" == "master" ]; then echo "latest"; else echo $BRANCH_NAME; fi)
+          # 对于 "master" 分支，使用 "latest" 版本号；其他分支或构建，使用分支名和运行编号
+          if [ "$BRANCH_NAME" == "master" ]; then
+              VERSION="latest"
+          else
+              VERSION="$BRANCH_NAME.${{ github.run_number }}"
+          fi
       
           echo IMAGE_ID=$IMAGE_ID
-          # echo VERSION=$VERSION.${{ github.run_id }}
           echo VERSION=$VERSION
       
+          # 打标签并推送
           docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
           docker push $IMAGE_ID:$VERSION
