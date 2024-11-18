@@ -5,7 +5,7 @@ FROM golang:1.23.3 AS builder
 WORKDIR /app
 
 # 複製 go.mod 和 go.sum（如果有的話）
-COPY go.mod go.sum ./
+COPY go.mod go.sum ./ 
 
 # 下載依賴
 RUN go mod download
@@ -51,6 +51,9 @@ COPY config.json /config/config.json
 
 # 設置可映射的配置和數據目錄
 VOLUME ["/config", "/data"]
+
+# 曝露端口 8080
+EXPOSE 8080
 
 ENTRYPOINT ["/entrypoint.sh"]
 
