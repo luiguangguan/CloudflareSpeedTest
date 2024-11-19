@@ -1,8 +1,9 @@
 {
-  "cron":"*/1 * * * *",
-  "f": "IPlist3.txt",
-  "url": "https://speed.cloudflare.com/__down?bytes=52428800",
-  "o": "",
+  "cron":"0,10,20,30,40,50 37 11,16,19,21 * * *",
+  "f": "/data/IPlist.txt",
+  "db":"/data/data.db",
+  "url": "https://speed.cloudflare.com/__down?bytes=52428800&",
+  "o": "/data/result.csv",
   "p": 20,
   "dn": 1000,
   "n": 10,

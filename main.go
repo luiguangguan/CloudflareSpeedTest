@@ -206,14 +206,26 @@ func main() {
 	}
 
 	// 启动web服务
-	web.Start()
-
+	go web.Start()
+	fmt.Println(cronExpr)
 	if cronExpr != "" {
+
+		times, err := getScheduleTimes(cronExpr, 20)
+		if err != nil {
+			fmt.Println("解析 Cron 表达式时出错:", err)
+			return
+		}
+
+		// 打印未来时间点
+		fmt.Println("未来的计划时间点:")
+		for i, t := range times {
+			fmt.Printf("%d. %s\n", i+1, t.Format("2006-01-02 15:04:05"))
+		}
 		// 创建新的 cron 调度器
 		c := cron.New(cron.WithSeconds())
 
 		// 配置 cron 表达式
-		_, err2 := c.AddFunc(cronExpr, test)
+		_, err2 := c.AddFunc(cronExpr, TestSpeed)
 		if err2 != nil {
 			fmt.Println("Error adding cron job:", err2)
 			return
@@ -230,6 +242,28 @@ func main() {
 	endPrint()
 }
 
+func getScheduleTimes(expr string, count int) ([]time.Time, error) {
+	parser := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
+	// 解析 Cron 表达式
+	schedule, err := parser.Parse(expr)
+	if err != nil {
+		return nil, err
+	}
+
+	// 获取当前时间
+	now := time.Now()
+	var times []time.Time
+
+	// 迭代计算未来的时间点
+	for i := 0; i < count; i++ {
+		next := schedule.Next(now)
+		times = append(times, next)
+		now = next
+	}
+
+	return times, nil
+}
+
 // func testCron() {
 // 	c := cron.New(cron.WithSeconds())
 // 	c.AddFunc("0,10,20,30,40,50 55 10,16,19,21 * * *", func() {
@@ -241,14 +275,14 @@ func main() {
 // }
 
 //測試函數
-func test() {
-	mu.Lock()
-	defer mu.Unlock()
+// func test() {
+// 	mu.Lock()
+// 	defer mu.Unlock()
 
-	fmt.Println("Task started at", time.Now())
-	time.Sleep(130 * time.Second) // 模拟任务执行时间
-	fmt.Println("Task completed at", time.Now())
-}
+// 	fmt.Println("Task started at", time.Now())
+// 	// time.Sleep(130 * time.Second) // 模拟任务执行时间
+// 	// fmt.Println("Task completed at", time.Now())
+// }
 
 func TestSpeed() {
 	// 加锁，确保同一时间只有一个任务在执行
