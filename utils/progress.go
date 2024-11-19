@@ -61,3 +61,7 @@ func (b *Bar) Done() {
 func (b *Bar) Current() int64 {
 	return b.pb.Current()
 }
+
+func (b *Bar) Total() int64 {
+	return b.pb.Total()
+}

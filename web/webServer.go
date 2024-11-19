@@ -9,14 +9,21 @@ import (
 func Start() {
 	r := gin.Default()
 	r.GET("/Process", func(c *gin.Context) {
-		currentDownload := GetProcessDownloadBar()
-		currentDelay := GetProcessDelayBar()
+		// 获取下载和延迟的当前值和总值
+		currentDownload, totalDownload := GetProcessDownloadBar()
+		currentDelay, totalDelay := GetProcessDelayBar()
 
-		// c.String(200, `{"Download":`+strconv.FormatInt(currentDownload, 10)+`,"Delay":`+strconv.FormatInt(currentDelay, 10)+`}`)
+		// 返回 JSON 格式的数据
 		c.JSON(200, gin.H{
-			"Download": currentDownload,
-			"Delay":    currentDelay,
+			"Download": gin.H{
+				"Current": currentDownload,
+				"Total":   totalDownload,
+			},
+			"Delay": gin.H{
+				"Current": currentDelay,
+				"Total":   totalDelay,
+			},
 		})
 	})
-	r.Run() // listen and serve on 0.0.0.0:8080
+	r.Run() // 启动服务，监听和服务在 0.0.0.0:8080
 }

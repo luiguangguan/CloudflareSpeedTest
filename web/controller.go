@@ -4,20 +4,22 @@ import (
 	"github.com/XIU2/CloudflareSpeedTest/task"
 )
 
-func GetProcessDownloadBar() int64 {
+func GetProcessDownloadBar() (current int64, total int64) {
 	if task.DownloadBar == nil {
-		return -1
+		return -1, -1
 	} else {
 		current := task.DownloadBar.Current()
-		return current
+		total := task.DownloadBar.Total()
+		return current, total
 	}
 }
 
-func GetProcessDelayBar() int64 {
+func GetProcessDelayBar() (current int64, total int64) {
 	if task.DelayBar == nil {
-		return -1
+		return -1, -1
 	} else {
 		current := task.DelayBar.Current()
-		return current
+		total := task.DelayBar.Total()
+		return current, total
 	}
 }
