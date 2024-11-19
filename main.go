@@ -190,6 +190,7 @@ func main() {
 		return
 	}
 	fmt.Println("当前运行目录:", dir)
+	fmt.Println("当前系统时间（格式化）:", currentTime.Format("2006-01-02 15:04:05"))
 	// return
 
 	task.InitRandSeed() // 置随机数种子
