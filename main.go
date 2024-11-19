@@ -190,6 +190,8 @@ func main() {
 		return
 	}
 	fmt.Println("当前运行目录:", dir)
+	// testCron()
+	// return
 
 	currentTime := time.Now()
 	fmt.Println("当前系统时间（格式化）:", currentTime.Format("2006-01-02 15:04:05"))
@@ -227,6 +229,16 @@ func main() {
 
 	endPrint()
 }
+
+// func testCron() {
+// 	c := cron.New(cron.WithSeconds())
+// 	c.AddFunc("0,10,20,30,40,50 55 10,16,19,21 * * *", func() {
+// 		fmt.Printf("Task starting...")
+// 	})
+// 	c.Start()
+// 	defer c.Stop()
+// 	select {}
+// }
 
 //測試函數
 func test() {
