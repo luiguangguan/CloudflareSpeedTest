@@ -65,6 +65,9 @@ func NewPing() *Ping {
 
 func (p *Ping) Run() utils.PingDelaySet {
 	if len(p.ips2) == 0 {
+		p.wg.Wait()
+		p.bar.Done()
+
 		return p.csv
 	}
 	if Httping {

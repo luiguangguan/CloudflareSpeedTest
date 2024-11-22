@@ -25,5 +25,15 @@ func Start() {
 			},
 		})
 	})
+
+	r.GET("/AllData", func(c *gin.Context) {
+		c.JSON(200, GetAllData())
+	})
+
+	r.GET("/Schedules", func(c *gin.Context) {
+		times := GetSchedules()
+		c.JSON(200, times)
+	})
+
 	r.Run() // 启动服务，监听和服务在 0.0.0.0:8080
 }

@@ -211,6 +211,7 @@ func main() {
 	if cronExpr != "" {
 
 		times, err := getScheduleTimes(cronExpr, 20)
+		web.ScheduleTime = times
 		if err != nil {
 			fmt.Println("解析 Cron 表达式时出错:", err)
 			return
@@ -292,12 +293,15 @@ func TestSpeed() {
 	// 开始延迟测速 + 过滤延迟/丢包 返回 []CloudflareIPData
 	pingData := task.NewPing().Run().FilterDelay().FilterLossRate()
 	// 开始下载测速
-	speedData := task.TestDownloadSpeed(pingData)
-	utils.ExportCsv(speedData) // 输出文件
-	speedData.Print()          // 打印结果
-	for _, data := range speedData {
-		utils.Save(&data)
-		// fmt.Printf("%d", rw)
+	if len(pingData) > 0 {
+
+		speedData := task.TestDownloadSpeed(pingData)
+		utils.ExportCsv(speedData) // 输出文件
+		speedData.Print()          // 打印结果
+		for _, data := range speedData {
+			utils.Save(&data)
+			// fmt.Printf("%d", rw)
+		}
 	}
 }
 

@@ -176,7 +176,8 @@ func loadIPRanges() []*IPPort {
 		}
 		file, err := os.Open(IPFile)
 		if err != nil {
-			log.Fatal(err)
+			return []*IPPort{}
+			// log.Fatal(err)
 		}
 		defer file.Close()
 		scanner := bufio.NewScanner(file)

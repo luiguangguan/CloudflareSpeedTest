@@ -35,6 +35,50 @@ CREATE TABLE IF NOT EXISTS speedTestResult (
 	"Remark" TEXT(100)
 );`
 
+const creteMaxSpeedView = `
+DROP VIEW IF EXISTS MaxSpeed;
+CREATE VIEW MaxSpeed AS
+SELECT 
+    IP,
+    Port,
+    MAX(DownloadSpeed) AS MaxDownloadSpeed,
+    MIN(DownloadSpeed) AS MinDownloadSpeed,
+    MIN(Delay) AS MinDelay,
+    MAX(Delay) AS MaxDelay,
+    AVG(Delay) AS AvgDelay,
+    SUM(LossRate) AS SumLossRate,
+    AVG(LossRate) AS AVGLossRate,
+    DATE(CreateTime) AS Date,
+    COUNT(1) AS Count,
+    Remark
+FROM 
+    speedTestResult
+GROUP BY 
+    IP, Port, DATE(CreateTime), Remark`
+
+const creteRecordView = `
+DROP VIEW IF EXISTS Record;
+CREATE VIEW Record AS
+select IP||'#'||Port||'#'||Remark Record,
+IP,
+Port,
+MAX(DownloadSpeed)MaxDownloadSpeed,
+MIN(DownloadSpeed)MinDownloadSpeed,
+Min(Delay)MinDelay,
+MAX(Delay)MaxDelay,
+AVG(Delay)AvgDelay,
+SUM(LossRate)SumLossRate,
+AVG(LossRate)AVGLossRate,
+SUBSTR(CreateTime ,1,10) Date,
+count(1)Count,
+Remark from speedTestResult 
+group by IP,
+port,
+SUBSTR(CreateTime,1,10),
+Remark 
+ORDER  by count(1) desc,
+max(DownloadSpeed) desc`
+
 // GetDBInstance 返回 SQLite 数据库的单例实例
 func GetDBInstance() (*sql.DB, error) {
 	var err error
@@ -66,7 +110,19 @@ func GetDBInstance() (*sql.DB, error) {
 
 		// 如果是首次运行，初始化数据
 		if _, err = dbInstance.Exec(createTableSQL); err != nil {
-			fmt.Println("初始化表结构失败:", err)
+			fmt.Println("初始化表speedTestResult结构失败:", err)
+			dbInstance.Close()
+			dbInstance = nil
+			return
+		}
+		if _, err = dbInstance.Exec(creteMaxSpeedView); err != nil {
+			fmt.Println("初始化视图MaxSpeed结构失败:", err)
+			dbInstance.Close()
+			dbInstance = nil
+			return
+		}
+		if _, err = dbInstance.Exec(creteRecordView); err != nil {
+			fmt.Println("初始化视图Record结构失败:", err)
 			dbInstance.Close()
 			dbInstance = nil
 			return
