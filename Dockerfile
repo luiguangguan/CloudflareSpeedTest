@@ -40,6 +40,9 @@ WORKDIR /app
 # 複製編譯後的二進制文件到運行映像
 COPY --from=builder /app/CloudflareSpeedTest /app/CloudflareSpeedTest
 
+# 複製 static 目錄到運行映像
+COPY --from=builder /app/static /app/static
+
 # 設置執行權限
 RUN chmod +x /app/CloudflareSpeedTest
 
