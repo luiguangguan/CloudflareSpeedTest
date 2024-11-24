@@ -1,19 +1,26 @@
 package web
 
 import (
-	// "strconv"
-
 	"github.com/gin-gonic/gin"
 )
 
 func Start() {
 	r := gin.Default()
+
+	// 提供 Vue 构建后的静态文件
+	r.Static("/static", "./static/vue")        // 提供 Vue 构建后的静态文件
+	r.Static("/assets", "./static/vue/assets") // 提供 Vue 构建后的 assets 文件
+
+	// 让根路径（/）访问 index.html
+	r.GET("/", func(c *gin.Context) {
+		c.File("./static/vue/index.html") // 直接返回 Vue 构建后的 index.html
+	})
+
+	// 后端 API 接口
 	r.GET("/Process", func(c *gin.Context) {
-		// 获取下载和延迟的当前值和总值
 		currentDownload, totalDownload := GetProcessDownloadBar()
 		currentDelay, totalDelay := GetProcessDelayBar()
 
-		// 返回 JSON 格式的数据
 		c.JSON(200, gin.H{
 			"Download": gin.H{
 				"Current": currentDownload,
@@ -35,5 +42,10 @@ func Start() {
 		c.JSON(200, times)
 	})
 
-	r.Run() // 启动服务，监听和服务在 0.0.0.0:8080
+	r.GET("/MaxData", func(c *gin.Context) {
+		c.JSON(200, GetMaxData())
+	})
+
+	// 启动服务，监听和服务在 0.0.0.0:8080
+	r.Run(":8080")
 }

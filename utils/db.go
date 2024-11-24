@@ -54,7 +54,7 @@ SELECT
 FROM 
     speedTestResult
 GROUP BY 
-    IP, Port, DATE(CreateTime), Remark`
+    IP, Port, DATE(CreateTime), Remark ORDER BY  MIN(DownloadSpeed) desc ,MAX(Delay) asc,MAX(LossRate) asc LIMIT 100;`
 
 const creteRecordView = `
 DROP VIEW IF EXISTS Record;

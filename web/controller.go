@@ -1,9 +1,10 @@
 package web
 
 import (
+	"time"
+
 	"github.com/XIU2/CloudflareSpeedTest/task"
 	"github.com/XIU2/CloudflareSpeedTest/utils"
-	"time"
 )
 
 var (
@@ -40,13 +41,23 @@ func GetSchedules() []string {
 }
 
 func GetAllData() []map[string]interface{} {
-	a, err := utils.Select("select * from speedTestResult")
+	all, err := utils.Select("select * from speedTestResult")
 	if err != nil {
 		// 处理错误
-		if a == nil {
+		if all == nil {
 
 		}
 	}
+	return all
+}
 
-	return a
+func GetMaxData() []map[string]interface{} {
+	all, err := utils.Select("select IP, Port, MaxDownloadSpeed, MinDownloadSpeed, MinDelay, MaxDelay, AvgDelay, SumLossRate, AVGLossRate, Date, Count, Remark from  MaxSpeed")
+	if err != nil {
+		// 处理错误
+		if all == nil {
+
+		}
+	}
+	return all
 }
