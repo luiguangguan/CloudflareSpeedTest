@@ -46,6 +46,16 @@ func Start() {
 		c.JSON(200, GetMaxData())
 	})
 
+	r.GET("/Get1DayMaxData", func(c *gin.Context) {
+		c.JSON(200, Get1DayMaxData())
+	})
+	r.GET("/Get3DayMaxData", func(c *gin.Context) {
+		c.JSON(200, Get3DayMaxData())
+	})
+	r.GET("/Get5DayMaxData", func(c *gin.Context) {
+		c.JSON(200, Get5DayMaxData())
+	})
+
 	// 启动服务，监听和服务在 0.0.0.0:8080
 	r.Run(":8080")
 }

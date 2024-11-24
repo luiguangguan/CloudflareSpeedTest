@@ -209,9 +209,8 @@ func main() {
 	go web.Start()
 	fmt.Println(cronExpr)
 	if cronExpr != "" {
-
-		times, err := getScheduleTimes(cronExpr, 20)
-		web.ScheduleTime = times
+		utils.CronExpr = cronExpr
+		times, err := utils.GetScheduleTimes(cronExpr, 20)
 		if err != nil {
 			fmt.Println("解析 Cron 表达式时出错:", err)
 			return
@@ -243,27 +242,27 @@ func main() {
 	endPrint()
 }
 
-func getScheduleTimes(expr string, count int) ([]time.Time, error) {
-	parser := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
-	// 解析 Cron 表达式
-	schedule, err := parser.Parse(expr)
-	if err != nil {
-		return nil, err
-	}
+// func getScheduleTimes(expr string, count int) ([]time.Time, error) {
+// 	parser := cron.NewParser(cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow)
+// 	// 解析 Cron 表达式
+// 	schedule, err := parser.Parse(expr)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	// 获取当前时间
-	now := time.Now()
-	var times []time.Time
+// 	// 获取当前时间
+// 	now := time.Now()
+// 	var times []time.Time
 
-	// 迭代计算未来的时间点
-	for i := 0; i < count; i++ {
-		next := schedule.Next(now)
-		times = append(times, next)
-		now = next
-	}
+// 	// 迭代计算未来的时间点
+// 	for i := 0; i < count; i++ {
+// 		next := schedule.Next(now)
+// 		times = append(times, next)
+// 		now = next
+// 	}
 
-	return times, nil
-}
+// 	return times, nil
+// }
 
 // func testCron() {
 // 	c := cron.New(cron.WithSeconds())
