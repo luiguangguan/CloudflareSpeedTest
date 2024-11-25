@@ -78,7 +78,7 @@ func Get1DayMaxData() []map[string]interface{} {
 	sqlQuery := `
 	SELECT IP, Port, MaxDownloadSpeed, MinDownloadSpeed, MinDelay, MaxDelay, AvgDelay, SumLossRate, AVGLossRate, Date, Count, Remark 
 	FROM MaxSpeed 
-	WHERE Date = ? LIMIT 50`
+	WHERE Date = ?  LIMIT 50`
 
 	// 执行 SQL 查询，并传递 tagert_day 作为查询参数
 	all, err := utils.Select(sqlQuery, tagert_day)
