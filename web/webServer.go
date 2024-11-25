@@ -12,7 +12,7 @@ func Start() {
 	r.Static("/assets", "./static/vue/assets") // 提供 Vue 构建后的 assets 文件
 
 	// 让根路径（/）访问 index.html
-	r.GET("/", func(c *gin.Context) {
+	r.GET("/speed", func(c *gin.Context) {
 		c.File("./static/vue/index.html") // 直接返回 Vue 构建后的 index.html
 	})
 
