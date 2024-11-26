@@ -197,6 +197,30 @@ func Select(query string, args ...interface{}) ([]map[string]interface{}, error)
 	return results, nil
 }
 
+// 查询一行一列的结果，返回一个值
+func Scalar(query string, args ...interface{}) (interface{}, error) {
+	db, err := GetDBInstance()
+	if err != nil {
+		return nil, err
+	}
+
+	// 执行查询，获取结果
+	row := db.QueryRow(query, args...)
+
+	// 通过 Scan 将查询结果扫描到一个变量中
+	var result interface{}
+	if err := row.Scan(&result); err != nil {
+		if err == sql.ErrNoRows {
+			// 如果没有返回行，返回 nil 或特定的错误
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	// 返回查询的结果
+	return result, nil
+}
+
 // PathExists 检查文件或目录是否存在
 func PathExists(path string) (bool, error) {
 	_, err := os.Stat(path)

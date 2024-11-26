@@ -33,6 +33,16 @@ func GetProcessDelayBar() (current int64, total int64, ip interface{}, available
 	}
 }
 
+func GetAllDataCount() interface{} {
+	sql := `select count(1) from speedTestResult`
+	count, err := utils.Scalar(sql)
+	if err != nil {
+		return -1
+	}
+	return count
+
+}
+
 func GetSchedules() []string {
 	var ts []string
 	if utils.CronExpr != "" {
@@ -84,7 +94,7 @@ func GetYesterdayMaxData() []map[string]interface{} {
 	FROM MaxSpeed 
 	WHERE Date = ? 
 	GROUP BY IP, Port,Remark 
-	order by MIN(MinDownloadSpeed) desc,SUM(Count)desc,MAX(MaxDelay) asc,AVG(AVGLossRate) asc
+	order by SUM(Count)desc,MIN(MinDownloadSpeed) desc,MAX(MaxDelay) asc,AVG(AVGLossRate) asc
 	LIMIT 100`
 
 	// 执行 SQL 查询，并传递 tagert_day 作为查询参数
@@ -105,7 +115,7 @@ func Get1DayMaxData() []map[string]interface{} {
 	FROM MaxSpeed 
 	WHERE Date = ? 
 	GROUP BY IP, Port,Remark 
-	order by MIN(MinDownloadSpeed) desc,SUM(Count)desc,MAX(MaxDelay) asc,AVG(AVGLossRate) asc
+	order by SUM(Count)desc,MIN(MinDownloadSpeed) desc,MAX(MaxDelay) asc,AVG(AVGLossRate) asc
 	LIMIT 100`
 
 	// 执行 SQL 查询，并传递 tagert_day 作为查询参数
@@ -129,7 +139,7 @@ func Get3DayMaxData() []map[string]interface{} {
 	FROM MaxSpeed 
 	WHERE Date >= ? 
 	GROUP BY IP, Port,Remark 
-	order by MIN(MinDownloadSpeed) desc,SUM(Count)desc,MAX(MaxDelay) asc,AVG(AVGLossRate) asc
+	order by SUM(Count)desc,MIN(MinDownloadSpeed) desc,MAX(MaxDelay) asc,AVG(AVGLossRate) asc
 	LIMIT 100`
 
 	// 执行 SQL 查询，并传递 tagert_day 作为查询参数
@@ -152,7 +162,7 @@ func Get5DayMaxData() []map[string]interface{} {
 	FROM MaxSpeed 
 	WHERE Date >= ? 
 	GROUP BY IP, Port,Remark 
-	order by MIN(MinDownloadSpeed) desc,SUM(Count)desc,MAX(MaxDelay) asc,AVG(AVGLossRate) asc
+	order by SUM(Count)desc,MIN(MinDownloadSpeed) desc,MAX(MaxDelay) asc,AVG(AVGLossRate) asc
 	LIMIT 100`
 
 	// 执行 SQL 查询，并传递 tagert_day 作为查询参数

@@ -20,7 +20,7 @@ func Start() {
 	r.GET("/Process", func(c *gin.Context) {
 		currentDownload, totalDownload, downloadIP, speed := GetProcessDownloadBar()
 		currentDelay, totalDelay, delayIP, available := GetProcessDelayBar()
-
+		count := GetAllDataCount()
 		c.JSON(200, gin.H{
 			"Download": gin.H{
 				"Current": currentDownload,
@@ -34,6 +34,7 @@ func Start() {
 				"IP":        delayIP,
 				"Available": available,
 			},
+			"AllDataCount": count,
 		})
 	})
 
