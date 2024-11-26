@@ -18,17 +18,21 @@ func Start() {
 
 	// 后端 API 接口
 	r.GET("/Process", func(c *gin.Context) {
-		currentDownload, totalDownload := GetProcessDownloadBar()
-		currentDelay, totalDelay := GetProcessDelayBar()
+		currentDownload, totalDownload, downloadIP, speed := GetProcessDownloadBar()
+		currentDelay, totalDelay, delayIP, available := GetProcessDelayBar()
 
 		c.JSON(200, gin.H{
 			"Download": gin.H{
 				"Current": currentDownload,
 				"Total":   totalDownload,
+				"IP":      downloadIP,
+				"Speed":   speed,
 			},
 			"Delay": gin.H{
-				"Current": currentDelay,
-				"Total":   totalDelay,
+				"Current":   currentDelay,
+				"Total":     totalDelay,
+				"IP":        delayIP,
+				"Available": available,
 			},
 		})
 	})

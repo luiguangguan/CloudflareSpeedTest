@@ -65,3 +65,10 @@ func (b *Bar) Current() int64 {
 func (b *Bar) Total() int64 {
 	return b.pb.Total()
 }
+func (b *Bar) GetOption(key string) interface{} {
+	if b == nil {
+		return ""
+	} else {
+		return b.pb.Get(key)
+	}
+}
