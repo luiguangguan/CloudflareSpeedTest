@@ -18,7 +18,7 @@ func NewBar(count int, MyStrStart, MyStrEnd string) *Bar {
 
 func NewBar_httping(count int, MyStrStart, MyStrEnd string) *Bar {
 	// 使用 %d 直接格式化状态码
-	tmpl := fmt.Sprintf(`{{string . "MyIP" | yellow }}  {{string . "Option"}}：{{string . "OptionValue" | green}} {{counters . }} {{ bar . "[" "-" (cycle . "↖" "↗" "↘" "↙") "_" "]"}} %s {{string . "MyStr" | green}} %s`, MyStrStart, MyStrEnd)
+	tmpl := fmt.Sprintf(`{{string . "MyIP" | yellow }}:{{string . "Port" | yellow }}{{string . "Option"}}：{{string . "OptionValue" | green}} {{counters . }} {{ bar . "[" "-" (cycle . "↖" "↗" "↘" "↙") "_" "]"}} %s {{string . "MyStr" | green}} %s`, MyStrStart, MyStrEnd)
 	bar := pb.ProgressBarTemplate(tmpl).Start(count)
 	return &Bar{pb: bar}
 }
@@ -26,7 +26,7 @@ func NewBar_httping(count int, MyStrStart, MyStrEnd string) *Bar {
 func NewBar_download(count int, MyStrStart, MyStrEnd string) *Bar {
 
 	// 模板添加两行：第一行显示 IP 地址，第二行显示速度，第三行显示进度条
-	tmpl := fmt.Sprintf(`{{string . "MyIP" | yellow }}：{{string . "Speed" | green }}MB/s {{counters . }} {{ bar . "[" "-" (cycle . "↖" "↗" "↘" "↙") "_" "]"}} %s {{string . "MyStr" | green}} %s`, MyStrStart, MyStrEnd)
+	tmpl := fmt.Sprintf(`{{string . "MyIP" | yellow }}:{{string . "Port" | yellow }}：{{string . "Speed" | green }}MB/s {{counters . }} {{ bar . "[" "-" (cycle . "↖" "↗" "↘" "↙") "_" "]"}} %s {{string . "MyStr" | green}} %s{{string . "Remark" | yellow }}`, MyStrStart, MyStrEnd)
 	bar := pb.ProgressBarTemplate(tmpl).Start(count)
 	return &Bar{pb: bar}
 }
@@ -35,14 +35,16 @@ func (b *Bar) Grow(num int, MyStrVal string) {
 	b.pb.Set("MyStr", MyStrVal).Add(num)
 }
 
-func (b *Bar) UpdateIPStatus(IP string, OptionValue int) {
+func (b *Bar) UpdateIPStatus(IP string, OptionValue int, port int, remark string) {
 	strOptionValue := fmt.Sprintf("%d", OptionValue)
-	b.pb.Set("MyIP", IP).Set("OptionValue", strOptionValue)
+	strPort := fmt.Sprintf("%d", port)
+	b.pb.Set("MyIP", IP).Set("OptionValue", strOptionValue).Set("Port", strPort).Set("Remark", remark)
 }
 
-func (b *Bar) UpdateIPSpeed(IP string, speed float64) {
+func (b *Bar) UpdateIPSpeed(IP string, speed float64, port int, remark string) {
 	strSpeed := fmt.Sprintf("%.2f", speed)
-	b.pb.Set("MyIP", IP).Set("Speed", strSpeed)
+	strPort := fmt.Sprintf("%d", port)
+	b.pb.Set("MyIP", IP).Set("Speed", strSpeed).Set("Port", strPort).Set("Remark", remark)
 }
 
 func (b *Bar) UpdateDownloadSpeed(speed float64) {

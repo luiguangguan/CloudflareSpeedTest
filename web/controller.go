@@ -9,27 +9,31 @@ import (
 
 var ()
 
-func GetProcessDownloadBar() (current int64, total int64, ip interface{}, speed interface{}) {
+func GetProcessDownloadBar() (current int64, total int64, ip interface{}, speed interface{}, port interface{}, remark interface{}) {
 	if task.DownloadBar == nil {
-		return -1, -1, "", ""
+		return -1, -1, "", "", "", ""
 	} else {
 		current = task.DownloadBar.Current()
 		total = task.DownloadBar.Total()
 		ip = task.DownloadBar.GetOption("MyIP")
 		speed = task.DownloadBar.GetOption("Speed")
-		return current, total, ip, speed
+		port = task.DownloadBar.GetOption("Port")
+		remark = task.DownloadBar.GetOption("Remark")
+		return current, total, ip, speed, port, remark
 	}
 }
 
-func GetProcessDelayBar() (current int64, total int64, ip interface{}, available interface{}) {
+func GetProcessDelayBar() (current int64, total int64, ip interface{}, available interface{}, port interface{}, remark interface{}) {
 	if task.DelayBar == nil {
-		return -1, -1, "", ""
+		return -1, -1, "", "", "", ""
 	} else {
 		current = task.DelayBar.Current()
 		total = task.DelayBar.Total()
 		ip = task.DelayBar.GetOption("MyIP")
 		available = task.DelayBar.GetOption("MyStr")
-		return current, total, ip, available
+		port = task.DelayBar.GetOption("Port")
+		remark = task.DelayBar.GetOption("Remark")
+		return current, total, ip, available, port, remark
 	}
 }
 

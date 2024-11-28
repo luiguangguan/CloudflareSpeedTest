@@ -76,7 +76,7 @@ func TestDownloadSpeed(ipSet utils.PingDelaySet) (speedSet utils.DownloadSpeedSe
 
 	DownloadBar = utils.NewBar_download(TestCount, bar_b, "")
 	for i := 0; i < testNum; i++ {
-		DownloadBar.UpdateIPSpeed(ipSet[i].IP.String(), 0)
+		DownloadBar.UpdateIPSpeed(ipSet[i].IP.String(), 0, ipSet[i].Port, ipSet[i].Remark)
 		speed := downloadHandler(ipSet[i].IP, ipSet[i].Port, DownloadBar)
 		ipSet[i].DownloadSpeed = speed
 		// 在每个 IP 下载测速后，以 [下载速度下限] 条件过滤结果

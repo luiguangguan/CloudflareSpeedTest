@@ -128,7 +128,7 @@ func (p *Ping) checkConnection(ip *net.IPAddr, port int) (recv int, totalDelay t
 			recv++
 			totalDelay += delay
 			//实时延迟
-			p.bar.UpdateIPStatus(ip.String(), int(delay.Milliseconds()))
+			p.bar.UpdateIPStatus(ip.String(), int(delay.Milliseconds()), port, "")
 		}
 	}
 	return

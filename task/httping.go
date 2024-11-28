@@ -44,20 +44,20 @@ func (p *Ping) httping(ip *net.IPAddr, port int) (int, time.Duration) {
 		requ, err := http.NewRequest(http.MethodHead, URL, nil)
 		if err != nil {
 			//实时Http状态码
-			p.bar.UpdateIPStatus(ip.String(), 0)
+			p.bar.UpdateIPStatus(ip.String(), 0, targetPort, "")
 			return 0, 0
 		}
 		requ.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.80 Safari/537.36")
 		resp, err := hc.Do(requ)
 		if err != nil {
 			//实时Http状态码
-			p.bar.UpdateIPStatus(ip.String(), 0)
+			p.bar.UpdateIPStatus(ip.String(), 0, targetPort, "")
 			return 0, 0
 		}
 		defer resp.Body.Close()
 
 		//实时Http状态码
-		p.bar.UpdateIPStatus(ip.String(), resp.StatusCode)
+		p.bar.UpdateIPStatus(ip.String(), resp.StatusCode, targetPort, "")
 
 		//fmt.Println("IP:", ip, "StatusCode:", resp.StatusCode, resp.Request.URL)
 		// 如果未指定的 HTTP 状态码，或指定的状态码不合规，则默认只认为 200、301、302 才算 HTTPing 通过

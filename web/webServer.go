@@ -14,6 +14,9 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 var writeMutex sync.Mutex
 
@@ -122,8 +125,8 @@ func handleProcessConnection(conn *websocket.Conn) {
 		// }
 
 		// 模拟获取数据并推送
-		currentDownload, totalDownload, downloadIP, speed := GetProcessDownloadBar()
-		currentDelay, totalDelay, delayIP, available := GetProcessDelayBar()
+		currentDownload, totalDownload, downloadIP, speed, downloadPort, downloadRemark := GetProcessDownloadBar()
+		currentDelay, totalDelay, delayIP, available, delayPort, delayRemark := GetProcessDelayBar()
 		count := GetAllDataCount()
 
 		message := gin.H{
@@ -132,12 +135,16 @@ func handleProcessConnection(conn *websocket.Conn) {
 				"Total":   totalDownload,
 				"IP":      downloadIP,
 				"Speed":   speed,
+				"Port":    downloadPort,
+				"Remark":  downloadRemark,
 			},
 			"Delay": gin.H{
 				"Current":   currentDelay,
 				"Total":     totalDelay,
 				"IP":        delayIP,
 				"Available": available,
+				"Port":      delayPort,
+				"Remark":    delayRemark,
 			},
 			"AllDataCount": count,
 		}
