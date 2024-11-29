@@ -144,7 +144,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: output/CloudflareST-arm64.exe
-          asset_name: CloudflareST-ARM.exe
+          asset_name: CloudflareST-ARM64.exe
           asset_content_type: application/octet-stream
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -164,7 +164,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: output/CloudflareST-arm64
-          asset_name: CloudflareST-ARM
+          asset_name: CloudflareST-ARM64
           asset_content_type: application/octet-stream
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
