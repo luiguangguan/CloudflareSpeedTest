@@ -288,12 +288,10 @@ func TestSpeed() {
 	// 加锁，确保同一时间只有一个任务在执行
 	mu.Lock()
 	defer mu.Unlock()
-
 	// 开始延迟测速 + 过滤延迟/丢包 返回 []CloudflareIPData
 	pingData := task.NewPing().Run().FilterDelay().FilterLossRate()
 	// 开始下载测速
 	if len(pingData) > 0 {
-
 		speedData := task.TestDownloadSpeed(pingData)
 		utils.ExportCsv(speedData) // 输出文件
 		speedData.Print()          // 打印结果

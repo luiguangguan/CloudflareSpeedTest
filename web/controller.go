@@ -9,9 +9,14 @@ import (
 
 var ()
 
-func GetProcessDownloadBar() (current int64, total int64, ip interface{}, speed interface{}, port interface{}, remark interface{}) {
+func GetProcessDownloadBar() (current int64, total int64, ip interface{}, speed interface{}, port interface{}, remark interface{}, duration *utils.ProcessDuration) {
+	duration = &utils.ProcessDuration{}
+	duration.Hours = 0
+	duration.Minutes = 0
+	duration.Seconds = 0
+	duration.StartTime = ""
 	if task.DownloadBar == nil {
-		return -1, -1, "", "", "", ""
+		return -1, -1, "", "", "", "", duration
 	} else {
 		current = task.DownloadBar.Current()
 		total = task.DownloadBar.Total()
@@ -19,13 +24,20 @@ func GetProcessDownloadBar() (current int64, total int64, ip interface{}, speed 
 		speed = task.DownloadBar.GetOption("Speed")
 		port = task.DownloadBar.GetOption("Port")
 		remark = task.DownloadBar.GetOption("Remark")
-		return current, total, ip, speed, port, remark
+		duration = task.DownloadBar.ProcessDuration()
+
+		return current, total, ip, speed, port, remark, duration
 	}
 }
 
-func GetProcessDelayBar() (current int64, total int64, ip interface{}, available interface{}, port interface{}, remark interface{}) {
+func GetProcessDelayBar() (current int64, total int64, ip interface{}, available interface{}, port interface{}, remark interface{}, duration *utils.ProcessDuration) {
+	duration = &utils.ProcessDuration{}
+	duration.Hours = 0
+	duration.Minutes = 0
+	duration.Seconds = 0
+	duration.StartTime = ""
 	if task.DelayBar == nil {
-		return -1, -1, "", "", "", ""
+		return -1, -1, "", "", "", "", duration
 	} else {
 		current = task.DelayBar.Current()
 		total = task.DelayBar.Total()
@@ -33,7 +45,8 @@ func GetProcessDelayBar() (current int64, total int64, ip interface{}, available
 		available = task.DelayBar.GetOption("MyStr")
 		port = task.DelayBar.GetOption("Port")
 		remark = task.DelayBar.GetOption("Remark")
-		return current, total, ip, available, port, remark
+		duration = task.DelayBar.ProcessDuration()
+		return current, total, ip, available, port, remark, duration
 	}
 }
 
