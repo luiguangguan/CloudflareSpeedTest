@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-    Windows:
+  Windows:
     name: Windows
     runs-on: windows-latest
 
