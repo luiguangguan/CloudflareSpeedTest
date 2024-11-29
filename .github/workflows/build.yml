@@ -11,6 +11,11 @@ jobs:
     name: Windows
     runs-on: windows-latest
 
+    strategy:
+      matrix:
+        goos: [windows]
+        goarch: [amd64, arm64]  # 为 Windows 添加 x86 和 ARM64
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -32,18 +37,23 @@ jobs:
       - name: Build
         run: |
           mkdir -p output
-          go build -o output/CloudflareST.exe
+          GOARCH=${{ matrix.goarch }} GOOS=${{ matrix.goos }} go build -o output/CloudflareST-${{ matrix.goarch }}.exe
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: CloudflareST-windows
-          path: ./output/CloudflareST.exe
+          name: CloudflareST-${{ matrix.goarch }}-windows
+          path: ./output/CloudflareST-${{ matrix.goarch }}.exe
 
   Linux:
     name: Linux
     runs-on: ubuntu-20.04
 
+    strategy:
+      matrix:
+        goos: [linux]
+        goarch: [amd64, arm64]  # 为 Linux 添加 x86 和 ARM64
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -65,13 +75,13 @@ jobs:
       - name: Build
         run: |
           mkdir -p output
-          go build -o output/CloudflareST
+          GOARCH=${{ matrix.goarch }} GOOS=${{ matrix.goos }} go build -o output/CloudflareST-${{ matrix.goarch }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: CloudflareST-linux
-          path: ./output/CloudflareST
+          name: CloudflareST-${{ matrix.goarch }}-linux
+          path: ./output/CloudflareST-${{ matrix.goarch }}
 
   release:
     name: Release
@@ -79,16 +89,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download Windows Artifact
+      - name: Download Windows Artifact (x86)
         uses: actions/download-artifact@v3
         with:
-          name: CloudflareST-windows
+          name: CloudflareST-amd64-windows
           path: output/
 
-      - name: Download Linux Artifact
+      - name: Download Windows Artifact (ARM)
         uses: actions/download-artifact@v3
         with:
-          name: CloudflareST-linux
+          name: CloudflareST-arm64-windows
+          path: output/
+
+      - name: Download Linux Artifact (x86)
+        uses: actions/download-artifact@v3
+        with:
+          name: CloudflareST-amd64-linux
+          path: output/
+
+      - name: Download Linux Artifact (ARM)
+        uses: actions/download-artifact@v3
+        with:
+          name: CloudflareST-arm64-linux
           path: output/
 
       - name: Generate Unique Tag
@@ -105,22 +127,42 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Windows Release Asset
+      - name: Upload Windows x86 Release Asset
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: output/CloudflareST.exe
+          asset_path: output/CloudflareST-amd64.exe
           asset_name: CloudflareST.exe
           asset_content_type: application/octet-stream
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Linux Release Asset
+      - name: Upload Windows ARM Release Asset
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: output/CloudflareST
-          asset_name: CloudflareST_linux
+          asset_path: output/CloudflareST-arm64.exe
+          asset_name: CloudflareST-ARM.exe
+          asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Linux x86 Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: output/CloudflareST-amd64
+          asset_name: CloudflareST
+          asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Linux ARM Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: output/CloudflareST-arm64
+          asset_name: CloudflareST-ARM
           asset_content_type: application/octet-stream
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
