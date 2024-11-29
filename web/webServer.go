@@ -128,6 +128,7 @@ func handleProcessConnection(conn *websocket.Conn) {
 		currentDownload, totalDownload, downloadIP, speed, downloadPort, downloadRemark, downloadDuration := GetProcessDownloadBar()
 		currentDelay, totalDelay, delayIP, available, delayPort, delayRemark, delayDuration := GetProcessDelayBar()
 		count := GetAllDataCount()
+		ts := GetSchedules()
 
 		message := gin.H{
 			"Download": gin.H{
@@ -149,6 +150,7 @@ func handleProcessConnection(conn *websocket.Conn) {
 				"Duration":  delayDuration,
 			},
 			"AllDataCount": count,
+			"NextTime":     ts[0],
 		}
 
 		// 写入数据
