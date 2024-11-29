@@ -52,7 +52,7 @@ jobs:
         echo "VERSION=$VERSION"
 
         # 使用 docker buildx 构建并推送多平台镜像
-        docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile -t $IMAGE_ID:$VERSION . --push
+        docker buildx build --platform linux/amd64,linux/arm64,linux/386,linux/riscv64,linux/arm/v7 -f Dockerfile -t $IMAGE_ID:$VERSION . --push
 
         # 打印构建成功的版本信息
         echo "Successfully built and pushed $IMAGE_ID:$VERSION"
