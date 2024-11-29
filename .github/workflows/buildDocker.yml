@@ -30,7 +30,7 @@ jobs:
       run: echo $ACCESS_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin
 
     # 构建和推送 Docker 镜像（支持多平台）
-    - name: Build and Push Docker Image for x86 and ARM
+    - name: Build and Push Docker Image for x86 and ARM riscv64
       env:
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         IMAGE_NAME: ${{ env.IMAGE_NAME }}
@@ -52,7 +52,7 @@ jobs:
         echo "VERSION=$VERSION"
 
         # 使用 docker buildx 构建并推送多平台镜像
-        docker buildx build --platform linux/amd64,linux/arm64,linux/386,linux/riscv64,linux/arm/v7 -f Dockerfile -t $IMAGE_ID:$VERSION . --push
+        docker buildx build --platform linux/amd64,linux/arm64,linux/386,linux/riscv64,linux/arm/v6 -f Dockerfile -t $IMAGE_ID:$VERSION . --push
 
         # 打印构建成功的版本信息
         echo "Successfully built and pushed $IMAGE_ID:$VERSION"
