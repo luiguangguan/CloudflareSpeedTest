@@ -14,7 +14,8 @@ RUN go mod download
 COPY . .
 
 # 編譯 Go 應用，設置目標平台為 linux/amd64
-RUN GOARCH=amd64 GOOS=linux go build -o CloudflareSpeedTest
+# RUN GOARCH=amd64 GOOS=linux go build -o CloudflareSpeedTest
+RUN GOARCH=${TARGETARCH} GOOS=linux go build -o CloudflareSpeedTest
 
 # 第二階段：運行階段
 FROM alpine:3.20
