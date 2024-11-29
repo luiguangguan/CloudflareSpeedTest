@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  Windows:
+    Windows:
     name: Windows
     runs-on: windows-latest
 
@@ -37,7 +37,9 @@ jobs:
       - name: Build
         run: |
           mkdir -p output
-          GOARCH=${{ matrix.goarch }} GOOS=${{ matrix.goos }} go build -o output/CloudflareST-${{ matrix.goarch }}.exe
+          $env:GOARCH="${{ matrix.goarch }}"  # 设置 GOARCH 环境变量
+          $env:GOOS="${{ matrix.goos }}"      # 设置 GOOS 环境变量
+          go build -o output/CloudflareST-${{ matrix.goarch }}.exe
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
