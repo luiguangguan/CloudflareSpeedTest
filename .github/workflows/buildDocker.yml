@@ -3,53 +3,56 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - dev  # 當推送到 main 分支時觸發
+      - dev  # 当推送到 dev 分支时触发
   workflow_dispatch:  # 添加手动触发的功能
   
 env:
-    IMAGE_NAME: cloudflarespeedtest
+  IMAGE_NAME: cloudflarespeedtest
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-    # 檢出代碼
+    # 检出代码
     - name: Checkout code
       uses: actions/checkout@v2
 
-    # # 設置 Docker 環境
-    # - name: Set up Docker Buildx
-    #   uses: docker/setup-buildx-action@v2
+    # 设置 Docker Buildx，启用跨平台构建支持
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-    - name: 构建镜像
-      run: docker build . --file Dockerfile --tag $IMAGE_NAME
-
-    # 登錄到 Docker Hub
-    - name:  登录到镜像仓库
+    # 登录到 Docker Hub
+    - name: Login to Docker Hub
       env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       run: echo $ACCESS_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin
-    - name: 推送镜像
+
+    # 构建和推送 Docker 镜像（支持多平台）
+    - name: Build and Push Docker Image for x86 and ARM
       env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        IMAGE_NAME: ${{ env.IMAGE_NAME }}
       run: |
-          IMAGE_ID=$DOCKER_USERNAME/$IMAGE_NAME
-          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
-      
-          # 从 GitHub 事件负载中获取分支名
-          BRANCH_NAME=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-      
-          # 对于 "master" 分支，使用 "latest" 版本号；其他分支或构建，使用分支名和运行编号
-          if [ "$BRANCH_NAME" == "master" ]; then
-              VERSION="latest"
-          else
-              VERSION="$BRANCH_NAME.${{ github.run_number }}"
-          fi
-      
-          echo IMAGE_ID=$IMAGE_ID
-          echo VERSION=$VERSION
-      
-          # 打标签并推送
-          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          docker push $IMAGE_ID:$VERSION
+        IMAGE_ID=$DOCKER_USERNAME/$IMAGE_NAME
+        IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+        # 获取 GitHub 事件负载中的分支名
+        BRANCH_NAME=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+        # 根据分支选择版本号
+        if [ "$BRANCH_NAME" == "master" ]; then
+          VERSION="latest"
+        else
+          VERSION="$BRANCH_NAME.${{ github.run_number }}"
+        fi
+
+        echo "IMAGE_ID=$IMAGE_ID"
+        echo "VERSION=$VERSION"
+
+        # 使用 docker buildx 构建并推送多平台镜像
+        docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile -t $IMAGE_ID:$VERSION . --push
+
+        # 打印构建成功的版本信息
+        echo "Successfully built and pushed $IMAGE_ID:$VERSION"
