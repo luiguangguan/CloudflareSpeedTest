@@ -60,13 +60,9 @@ jobs:
         unzip -o dist.zip -d dist
     
         # 将解压出来的文件复制到指定目录
-        echo "Copying files to ./vue/static/..."
-        pwd
-        ls
+        echo "Copying files to ./static/vue/..."
         rm -rf ./vue/static/*
-         pwd
-        ls
-        cp -r ./dist/dist/* ./vue/static/
+        cp -r ./dist/dist/* ./static/vue/
     
         echo "Finished downloading and extracting dist.zip"
   
