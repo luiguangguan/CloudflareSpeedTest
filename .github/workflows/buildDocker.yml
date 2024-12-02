@@ -61,6 +61,8 @@ jobs:
     
         # 将解压出来的文件复制到指定目录
         echo "Copying files to ./vue/static/..."
+        pwd
+        ls
         rm -rf ./vue/static/*
         cp -r ./dist/dist/* ./vue/static/
     
