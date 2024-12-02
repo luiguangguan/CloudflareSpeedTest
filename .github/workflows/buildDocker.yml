@@ -25,40 +25,48 @@ jobs:
       run: |
         # 作者名称
         REPO_OWNER="luiguangguan"
-        REPO_NAME="WebUICloudflareSpeedTes"
-
+        REPO_NAME="WebUICloudflareSpeedTest"
+    
         echo "Fetching latest release for $REPO_OWNER/$REPO_NAME..."
-
-        # 使用 GitHub API 获取最新发布版本信息（不需要认证）
+    
+        # 使用 GitHub API 获取最新发布版本信息
         RESPONSE=$(curl -s https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest)
-
-        # 检查是否有 latest 发布
-        LATEST_TAG=$(echo "$RESPONSE" | jq -r '.tag_name')
-        if [ "$LATEST_TAG" == "null" ]; then
-          echo "No latest release found."
+    
+        # 检查是否成功获取最新发布版本
+        if [ "$(echo "$RESPONSE" | jq -r '.message')" == "Not Found" ]; then
+          echo "No releases found or repository not found."
           exit 1
         fi
-
+    
+        # 获取最新版本的标签
+        LATEST_TAG=$(echo "$RESPONSE" | jq -r '.tag_name')
         echo "Latest release found: $LATEST_TAG"
-
-        # 检查是否包含 dist.zip 资产
+    
+        # 查找名为 "dist.zip" 的附件
         DIST_ZIP_URL=$(echo "$RESPONSE" | jq -r '.assets[] | select(.name == "dist.zip") | .browser_download_url')
+        
         if [ -z "$DIST_ZIP_URL" ]; then
           echo "No dist.zip found in the latest release."
           exit 1
         fi
-
-        echo "Downloading dist.zip..."
+    
+        # 下载 dist.zip 文件
+        echo "Downloading dist.zip from $DIST_ZIP_URL..."
         curl -L -o dist.zip "$DIST_ZIP_URL"
-
+    
+        # 解压 dist.zip 文件
         echo "Unzipping dist.zip..."
         mkdir -p dist
         unzip -o dist.zip -d dist
-        echo "Unzipped dist.zip to ./dist"
-
+    
+        # 将解压出来的文件复制到指定目录
         echo "Copying files to ./vue/static/..."
         rm -rf ./vue/static/*
         cp -r ./dist/dist/* ./vue/static/
+    
+        echo "Finished downloading and extracting dist.zip"
+  
+    
 
 
     # 3. 设置 Docker Buildx，启用跨平台构建支持
