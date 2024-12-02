@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev  # 当推送到 dev 分支时触发
+      
   workflow_dispatch:  # 添加手动触发的功能
 
 env:
