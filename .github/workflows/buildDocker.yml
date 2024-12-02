@@ -29,11 +29,10 @@ jobs:
 
         echo "Fetching latest release for $REPO_OWNER/$REPO_NAME..."
 
-        # 使用 GitHub API 获取最新发布版本信息
-        RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-        https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest)
+        # 使用 GitHub API 获取最新发布版本信息（不需要认证）
+        RESPONSE=$(curl -s https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest)
 
-        # 检查是否有 `latest` 发布
+        # 检查是否有 latest 发布
         LATEST_TAG=$(echo "$RESPONSE" | jq -r '.tag_name')
         if [ "$LATEST_TAG" == "null" ]; then
           echo "No latest release found."
@@ -50,14 +49,17 @@ jobs:
         fi
 
         echo "Downloading dist.zip..."
-        curl -L -o dist.zip -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "$DIST_ZIP_URL"
+        curl -L -o dist.zip "$DIST_ZIP_URL"
 
         echo "Unzipping dist.zip..."
         mkdir -p dist
         unzip -o dist.zip -d dist
         echo "Unzipped dist.zip to ./dist"
+
+        echo "Copying files to ./vue/static/..."
         rm -rf ./vue/static/*
         cp -r ./dist/dist/* ./vue/static/
+
 
     # 3. 设置 Docker Buildx，启用跨平台构建支持
     - name: Set up Docker Buildx
