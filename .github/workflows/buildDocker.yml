@@ -80,6 +80,34 @@ jobs:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       run: echo $ACCESS_TOKEN | docker login -u $DOCKER_USERNAME --password-stdin
 
+    - name: 检查并重标已存在镜像
+      run: |
+        IMAGE_ID=$DOCKER_USERNAME/$IMAGE_NAME
+        IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+        
+        # 获取 GitHub 事件中的分支名称
+        BRANCH_NAME=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+        
+        # 对于 master 分支使用 latest 版本号
+        VERSION=$(if [ "$BRANCH_NAME" == "master" ]; then echo "latest"; else echo $BRANCH_NAME; fi)
+
+        echo "Checking if the image $IMAGE_ID:$VERSION exists on Docker Hub..."
+
+        # 使用 Docker Hub API 检查是否存在该标签的镜像
+        TAG_EXISTS=$(curl -s -u $DOCKER_USERNAME:$ACCESS_TOKEN "https://hub.docker.com/v2/repositories/$DOCKER_USERNAME/$IMAGE_NAME/tags/$VERSION/" | jq -r '.name')
+
+        if [ "$TAG_EXISTS" == "$VERSION" ]; then
+          # 使用 github.run_number 计算新的标签
+          PREV_RUN_NUMBER=$(( ${{ github.run_number }} - 1 ))
+          echo "Tagging the existing image with run number: $PREV_RUN_NUMBER"
+          
+          # 给现有标签重新打上新的标签 (将远程镜像标签为 $VERSION 改为 $PREV_RUN_NUMBER)
+          docker pull $IMAGE_ID:$VERSION
+          docker tag $IMAGE_ID:$VERSION $IMAGE_ID:$PREV_RUN_NUMBER
+          docker push $IMAGE_ID:$PREV_RUN_NUMBER
+        else
+          echo "No existing image found with tag $VERSION on Docker Hub."
+        fi
     # 5. 构建和推送 Docker 镜像（支持多平台）
     - name: Build and Push Docker Image for x86 and ARM riscv64
       run: |
@@ -94,6 +122,7 @@ jobs:
           VERSION="latest"
         else
           VERSION="latest"
+          # VERSION="$BRANCH_NAME.${{ github.run_number }}"
         fi
 
         echo "IMAGE_ID=$IMAGE_ID"
