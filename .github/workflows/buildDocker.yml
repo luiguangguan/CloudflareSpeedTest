@@ -64,6 +64,8 @@ jobs:
         pwd
         ls
         rm -rf ./vue/static/*
+         pwd
+        ls
         cp -r ./dist/dist/* ./vue/static/
     
         echo "Finished downloading and extracting dist.zip"
