@@ -107,7 +107,7 @@ func GetMaxData() []map[string]interface{} {
 func GetYesterdayMaxData() []map[string]interface{} {
 	tagert_day := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
 	sqlQuery := `
-	SELECT IP, Port, MAX(MaxDownloadSpeed)MaxDownloadSpeed, MIN(MinDownloadSpeed)MinDownloadSpeed,AVG(AvgDownloadSpeed)AvgDownloadSpeed,, MIN(MinDelay)MinDelay, MAX(MaxDelay)MaxDelay, AVG(AvgDelay)AvgDelay, SUM(SumLossRate), AVG(AVGLossRate)AVGLossRate, Date, SUM(Count)Count, Remark 
+	SELECT IP, Port, MAX(MaxDownloadSpeed)MaxDownloadSpeed, MIN(MinDownloadSpeed)MinDownloadSpeed,AVG(AvgDownloadSpeed)AvgDownloadSpeed, MIN(MinDelay)MinDelay, MAX(MaxDelay)MaxDelay, AVG(AvgDelay)AvgDelay, SUM(SumLossRate), AVG(AVGLossRate)AVGLossRate, Date, SUM(Count)Count, Remark 
 	FROM MaxSpeed 
 	WHERE Date = ? 
 	GROUP BY IP, Port,Remark 
@@ -128,7 +128,7 @@ func GetYesterdayMaxData() []map[string]interface{} {
 func Get1DayMaxData() []map[string]interface{} {
 	tagert_day := time.Now().Format("2006-01-02")
 	sqlQuery := `
-	SELECT IP, Port, MAX(MaxDownloadSpeed)MaxDownloadSpeed, MIN(MinDownloadSpeed)MinDownloadSpeed,AVG(AvgDownloadSpeed)AvgDownloadSpeed,, MIN(MinDelay)MinDelay, MAX(MaxDelay)MaxDelay, AVG(AvgDelay)AvgDelay, SUM(SumLossRate), AVG(AVGLossRate)AVGLossRate, Date, SUM(Count)Count, Remark 
+	SELECT IP, Port, MAX(MaxDownloadSpeed)MaxDownloadSpeed, MIN(MinDownloadSpeed)MinDownloadSpeed,AVG(AvgDownloadSpeed)AvgDownloadSpeed, MIN(MinDelay)MinDelay, MAX(MaxDelay)MaxDelay, AVG(AvgDelay)AvgDelay, SUM(SumLossRate), AVG(AVGLossRate)AVGLossRate, Date, SUM(Count)Count, Remark 
 	FROM MaxSpeed 
 	WHERE Date = ? 
 	GROUP BY IP, Port,Remark 
@@ -152,7 +152,7 @@ func Get3DayMaxData() []map[string]interface{} {
 
 	// 使用 SQL 查询过去3天的数据，条件使用字符串格式的日期进行比较
 	sqlQuery := `
-	SELECT IP, Port, MAX(MaxDownloadSpeed)MaxDownloadSpeed, MIN(MinDownloadSpeed)MinDownloadSpeed,AVG(AvgDownloadSpeed)AvgDownloadSpeed,, MIN(MinDelay)MinDelay, MAX(MaxDelay)MaxDelay, AVG(AvgDelay)AvgDelay, SUM(SumLossRate), AVG(AVGLossRate)AVGLossRate, Date, SUM(Count)Count, Remark 
+	SELECT IP, Port, MAX(MaxDownloadSpeed)MaxDownloadSpeed, MIN(MinDownloadSpeed)MinDownloadSpeed,AVG(AvgDownloadSpeed)AvgDownloadSpeed, MIN(MinDelay)MinDelay, MAX(MaxDelay)MaxDelay, AVG(AvgDelay)AvgDelay, SUM(SumLossRate), AVG(AVGLossRate)AVGLossRate, Date, SUM(Count)Count, Remark 
 	FROM MaxSpeed 
 	WHERE Date >= ? 
 	GROUP BY IP, Port,Remark 
@@ -175,7 +175,7 @@ func Get5DayMaxData() []map[string]interface{} {
 
 	// 使用 SQL 查询过去3天的数据，条件使用字符串格式的日期进行比较
 	sqlQuery := `
-	SELECT IP, Port, MAX(MaxDownloadSpeed)MaxDownloadSpeed, MIN(MinDownloadSpeed)MinDownloadSpeed,AVG(AvgDownloadSpeed)AvgDownloadSpeed,, MIN(MinDelay)MinDelay, MAX(MaxDelay)MaxDelay, AVG(AvgDelay)AvgDelay, SUM(SumLossRate), AVG(AVGLossRate)AVGLossRate, Date, SUM(Count)Count, Remark 
+	SELECT IP, Port, MAX(MaxDownloadSpeed)MaxDownloadSpeed, MIN(MinDownloadSpeed)MinDownloadSpeed,AVG(AvgDownloadSpeed)AvgDownloadSpeed, MIN(MinDelay)MinDelay, MAX(MaxDelay)MaxDelay, AVG(AvgDelay)AvgDelay, SUM(SumLossRate), AVG(AVGLossRate)AVGLossRate, Date, SUM(Count)Count, Remark 
 	FROM MaxSpeed 
 	WHERE Date >= ? 
 	GROUP BY IP, Port,Remark 
