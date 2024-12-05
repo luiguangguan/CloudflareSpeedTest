@@ -43,6 +43,7 @@ SELECT
     Port,
     MAX(DownloadSpeed) AS MaxDownloadSpeed,
     MIN(DownloadSpeed) AS MinDownloadSpeed,
+    AVG(DownloadSpeed) AS AvgDownloadSpeed,
 	ROUND(MIN(Delay),2) AS MinDelay,
     ROUND(MAX(Delay),2) AS MaxDelay,
     ROUND(AVG(Delay),2) AS AvgDelay,
