@@ -84,6 +84,10 @@ func Start() {
 		c.JSON(200, GetYesterdayMaxData())
 	})
 
+	r.GET("/GetIPTraceInfos", func(c *gin.Context) {
+		c.JSON(200, GetIPTraceInfos())
+	})
+
 	// 启动服务
 	r.Run(":8080")
 }

@@ -35,27 +35,41 @@ CREATE TABLE IF NOT EXISTS speedTestResult (
 	"Remark" TEXT(100)
 );`
 
+const createTableIpTraceInfosSQL = `
+CREATE TABLE IF NOT EXISTS "IpTraceInfos" (
+  "IP" TEXT(64) NOT NULL,
+  "TraceInfo" TEXT(10000) NOT NULL,
+  "Remark" TEXT(100),
+  "CreateTime"  TEXT NOT NULL
+);`
+
+const creteTraceInfoUniqueView = `DROP VIEW IF EXISTS TraceInfoUnique;
+CREATE VIEW "TraceInfoUnique" AS select IP,MAX(TraceInfo) TraceInfo from IpTraceInfos Group by IP;`
+
 const creteMaxSpeedView = `
 DROP VIEW IF EXISTS MaxSpeed;
 CREATE VIEW MaxSpeed AS
 SELECT 
-    IP,
-    Port,
-    MAX(DownloadSpeed) AS MaxDownloadSpeed,
-    MIN(DownloadSpeed) AS MinDownloadSpeed,
-    AVG(DownloadSpeed) AS AvgDownloadSpeed,
-	ROUND(MIN(Delay),2) AS MinDelay,
-    ROUND(MAX(Delay),2) AS MaxDelay,
-    ROUND(AVG(Delay),2) AS AvgDelay,
-    SUM(LossRate) AS SumLossRate,
-    AVG(LossRate) AS AVGLossRate,
-    DATE(CreateTime) AS Date,
+    A.IP,
+    A.Port,
+    MAX(A.DownloadSpeed) AS MaxDownloadSpeed,
+    MIN(A.DownloadSpeed) AS MinDownloadSpeed,
+    AVG(A.DownloadSpeed) AS AvgDownloadSpeed,
+		ROUND(MIN(A.Delay),2) AS MinDelay,
+    ROUND(MAX(A.Delay),2) AS MaxDelay,
+    ROUND(AVG(A.Delay),2) AS AvgDelay,
+    SUM(A.LossRate) AS SumLossRate,
+    AVG(A.LossRate) AS AVGLossRate,
+    DATE(A.CreateTime) AS Date,
     COUNT(1) AS Count,
-    Remark
+    A.Remark,
+		B.TraceInfo
 FROM 
-    speedTestResult
+    speedTestResult as A
+		left join TraceInfoUnique As B
+		on A.IP=B.IP
 GROUP BY 
-    IP, Port, DATE(CreateTime), Remark ORDER BY  MIN(DownloadSpeed) desc ,MAX(Delay) asc,MAX(LossRate) asc;`
+    A.IP, A.Port, DATE(A.CreateTime), A.Remark ORDER BY  MIN(A.DownloadSpeed) desc ,MAX(A.Delay) asc,MAX(A.LossRate) asc;`
 
 const creteRecordView = `
 DROP VIEW IF EXISTS Record;
@@ -80,6 +94,26 @@ Remark
 ORDER  by count(1) desc,
 max(DownloadSpeed) desc`
 
+const speedTestWithTrace = `DROP VIEW IF EXISTS speedTestWithTrace;
+CREATE VIEW "speedTestWithTrace" AS SELECT
+    s."IP",
+    s."Port",
+    s."Sended",
+    s."Received",
+    s."Delay",
+    s."LossRate",
+    s."DownloadSpeed",
+    s."CreateTime",
+    s."Remark" AS speedTestRemark,
+    i."TraceInfo",
+    i."Remark" AS traceInfoRemark
+FROM
+    speedTestResult s
+LEFT JOIN
+    IpTraceInfos i
+ON
+    s."IP" = i."IP"`
+
 // GetDBInstance 返回 SQLite 数据库的单例实例
 func GetDBInstance() (*sql.DB, error) {
 	var err error
@@ -103,6 +137,9 @@ func GetDBInstance() (*sql.DB, error) {
 			return
 		}
 
+		// result, err := dbInstance.Exec("PRAGMA journal_mode=WAL;")
+		// _, err := result.RowsAffected()
+
 		// 检查连接是否可用
 		if err = dbInstance.Ping(); err != nil {
 			fmt.Println("数据库连接测试失败:", err)
@@ -116,6 +153,18 @@ func GetDBInstance() (*sql.DB, error) {
 			dbInstance = nil
 			return
 		}
+		if _, err = dbInstance.Exec(createTableIpTraceInfosSQL); err != nil {
+			fmt.Println("初始化表createTableIpTraceInfosSQL结构失败:", err)
+			dbInstance.Close()
+			dbInstance = nil
+			return
+		}
+		if _, err = dbInstance.Exec(creteTraceInfoUniqueView); err != nil {
+			fmt.Println("初始化视图TraceInfoUnique结构失败:", err)
+			dbInstance.Close()
+			dbInstance = nil
+			return
+		}
 		if _, err = dbInstance.Exec(creteMaxSpeedView); err != nil {
 			fmt.Println("初始化视图MaxSpeed结构失败:", err)
 			dbInstance.Close()
@@ -124,6 +173,12 @@ func GetDBInstance() (*sql.DB, error) {
 		}
 		if _, err = dbInstance.Exec(creteRecordView); err != nil {
 			fmt.Println("初始化视图Record结构失败:", err)
+			dbInstance.Close()
+			dbInstance = nil
+			return
+		}
+		if _, err = dbInstance.Exec(speedTestWithTrace); err != nil {
+			fmt.Println("初始化视图speedTestWithTrace结构失败:", err)
 			dbInstance.Close()
 			dbInstance = nil
 			return

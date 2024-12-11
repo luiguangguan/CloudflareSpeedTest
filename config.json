@@ -1,5 +1,5 @@
 {
-  "cron":"0 */3 * * * *",
+  "cron":"0 */3 * * 10 *",
   "f": "data/IPlist.txt",
   "db":"data/data.db",
   "url": "https://speed.cloudflare.com/__down?bytes=52428800",

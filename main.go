@@ -123,6 +123,21 @@ https://github.com/XIU2/CloudflareSpeedTest
 	// 如果提供了 -c 参数，则读取配置文件
 	fmt.Print(configFile)
 	if configFile != "" {
+		if !utils.FileExists(configFile) {
+			utils.WriteToFile(configFile, `{
+    "cron":"0 0 12,16,21,23 * * *",
+    "f": "/data/IPlist.txt",
+    "db":"/data/data.db",
+    "url": "https://speed.cloudflare.com/__down?bytes=52428800&",
+    "o": "/data/result.csv",
+    "p": 20,
+    "dn": 1000,
+    "n": 10,
+    "tp": 443,
+    "httping": true,
+    "httping-code": 404
+  }`, "utf8", false)
+		}
 		fileConfig, err := utils.LoadConfig(configFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "加载配置文件出错: %v\n", err)
@@ -204,6 +219,7 @@ func main() {
 	if versionNew != "" {
 		fmt.Printf("\n*** 发现新版本 [%s]！请前往 [https://github.com/XIU2/CloudflareSpeedTest] 更新！ ***\n", versionNew)
 	}
+	// utils.ExecNonQuery("delete from IpTraceInfos")
 
 	// 启动web服务
 	go web.Start()
@@ -232,6 +248,12 @@ func main() {
 		}
 		// 启动调度器
 		c.Start()
+
+		//啓動路由跟中
+		if utils.TraceRunning == false {
+			utils.TraceRouteIP()
+		}
+
 		defer c.Stop()
 		// 防止主程序退出
 		select {} // 可以用通道或其他方式阻止退出

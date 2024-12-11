@@ -44,3 +44,9 @@ func WriteToFile(path string, content string, encoding string, append bool) erro
 
 	return nil
 }
+
+// 判斷文件是否存在
+func FileExists(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return !os.IsNotExist(err)
+}
