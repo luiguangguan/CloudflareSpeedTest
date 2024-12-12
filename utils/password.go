@@ -31,12 +31,12 @@ func CheckPassword(pwd string) (sucess bool, pwdTotalCount int64) {
 
 func EditePassword(oldPwd string, newPwd string) (success bool, msg string) {
 	sucess, count := CheckPassword(oldPwd)
+	time.Sleep(time.Second * 1)
 	if sucess {
 		r, err := ExecNonQuery("insert into Passwords (pwd)values(?)", newPwd)
 		if r < 1 || err != nil {
-			return false, "修改失败1+" + err.Error()
+			return false, "修改失败1--" + err.Error()
 		}
-		time.Sleep(time.Second * 1)
 		if count > 0 {
 
 			r, err = ExecNonQuery("delete from Passwords where pwd=?", oldPwd)
