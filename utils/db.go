@@ -14,11 +14,12 @@ const (
 )
 
 var (
-	dbInstance *sql.DB         // 单例数据库实例
-	dbOnce     sync.Once       // 确保单例的创建只执行一次
-	dbErr      error           // 用于捕获数据库初始化错误
-	isFirstRun bool            // 标记是否为首次运行
-	DbFile     = defaultDbFile // 数据文件路径
+	dbInstance        *sql.DB         // 单例数据库实例
+	dbOnce            sync.Once       // 确保单例的创建只执行一次
+	dbErr             error           // 用于捕获数据库初始化错误
+	isFirstRun        bool            // 标记是否为首次运行
+	DbFile            = defaultDbFile // 数据文件路径
+	ExecNonQueryMutex sync.Mutex
 )
 
 // 初始化表结构
@@ -202,6 +203,7 @@ func GetDBInstance() (*sql.DB, error) {
 
 // 通用的非查询执行方法，用于插入、更新、删除操作
 func ExecNonQuery(query string, args ...interface{}) (int64, error) {
+	ExecNonQueryMutex.Lock()
 	db, err := GetDBInstance()
 	if err != nil {
 		fmt.Println("获取数据库实例时出错:", err) // 输出获取数据库实例时的错误
@@ -221,6 +223,7 @@ func ExecNonQuery(query string, args ...interface{}) (int64, error) {
 		fmt.Println("获取受影响行数时出错:", err) // 输出获取受影响行数时的错误
 		return 0, err
 	}
+	ExecNonQueryMutex.Unlock()
 
 	return rowsAffected, nil
 }
