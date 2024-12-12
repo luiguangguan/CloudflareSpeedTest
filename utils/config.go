@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bufio"
 	"encoding/json"
 	"os"
 )
@@ -29,6 +30,10 @@ type Config struct {
 	CronExpr          string  `json:"cron"`
 }
 
+var (
+	config Config
+)
+
 // LoadConfig reads a JSON configuration file and returns a Config struct
 func LoadConfig(filePath string) (*Config, error) {
 	file, err := os.Open(filePath)
@@ -37,11 +42,33 @@ func LoadConfig(filePath string) (*Config, error) {
 	}
 	defer file.Close()
 
-	var config Config
 	if err := json.NewDecoder(file).Decode(&config); err != nil {
 		return nil, err
 	}
 
 	// 使用文件中的配置值更新 flag 值
 	return &config, nil
+}
+
+func GetConfigFileContent() string {
+	file, err := os.Open(config.IPFile)
+	if err != nil {
+		return ""
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	// scanner
+	var text string
+	for scanner.Scan() { // 循环遍历文件每一行
+		text += scanner.Text() + "\n"
+	}
+
+	if err != nil {
+		return ""
+	}
+	return text
+}
+
+func GetConfigIpFilePath() string {
+	return config.IPFile
 }

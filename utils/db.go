@@ -35,6 +35,11 @@ CREATE TABLE IF NOT EXISTS speedTestResult (
 	"Remark" TEXT(100)
 );`
 
+const createPasswordsTableSQL = `
+CREATE TABLE IF NOT EXISTS Passwords (
+	"pwd" TEXT(64) NOT NULL
+);`
+
 const createTableIpTraceInfosSQL = `
 CREATE TABLE IF NOT EXISTS "IpTraceInfos" (
   "IP" TEXT(64) NOT NULL,
@@ -149,6 +154,13 @@ func GetDBInstance() (*sql.DB, error) {
 		// 如果是首次运行，初始化数据
 		if _, err = dbInstance.Exec(createTableSQL); err != nil {
 			fmt.Println("初始化表speedTestResult结构失败:", err)
+			dbInstance.Close()
+			dbInstance = nil
+			return
+		}
+		// 如果是首次运行，初始化数据
+		if _, err = dbInstance.Exec(createPasswordsTableSQL); err != nil {
+			fmt.Println("初始化表Passwords结构失败:", err)
 			dbInstance.Close()
 			dbInstance = nil
 			return

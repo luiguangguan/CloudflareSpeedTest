@@ -2,7 +2,6 @@ package web
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -13,8 +12,15 @@ import (
 )
 
 type SubmitData struct {
-	Action  string
-	content string
+	Password string
+	Action   string
+	Content  string
+}
+
+type EditPassword struct {
+	OldPwd  string
+	NewPwd1 string
+	NewPwd2 string
 }
 
 // WebSocket 升级器
@@ -95,6 +101,15 @@ func Start() {
 		c.JSON(200, GetIPTraceInfos())
 	})
 
+	// r.GET("/GetPwd", func(c *gin.Context) {
+	// 	d, _ := utils.Select("select * from Passwords")
+
+	// 	c.JSON(200,
+	// 		gin.H{
+	// 			"data": d,
+	// 		})
+	// })
+
 	r.POST("/IPs", func(c *gin.Context) {
 		var data SubmitData
 
@@ -102,23 +117,25 @@ func Start() {
 		if err := c.ShouldBindJSON(&data); err != nil {
 			// 如果请求体有问题，返回 400 错误
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid request data",
+				"message": "Invalid request data",
 			})
 			return
 		}
-
+		b, _ := utils.CheckPassword(data.Password)
+		if !b {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Password Incorrect",
+			})
+			return
+		}
 		// 根据 action 执行不同的操作
-		if data.Action == "overwrite" {
-			// 处理覆盖的逻辑
-			// 比如，将内容保存到文件或数据库等
-		} else if data.Action == "append" {
-			// 处理追加的逻辑
-			// 比如，将内容追加到文件或数据库等
-			log.Println("Handling append action")
+		if data.Action == "overwrite" || data.Action == "append" {
+			// 处理写文件
+			SaveIps(data.Content, data.Action == "append")
 		} else {
 			// 如果 action 不符合要求，返回 400 错误
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid action",
+				"message": "Invalid action",
 			})
 			return
 		}
@@ -129,6 +146,46 @@ func Start() {
 		})
 	})
 
+	r.GET("/GetIPs", func(c *gin.Context) {
+		Data := []byte(GetIPs())
+
+		c.Data(http.StatusOK, "text/plain; charset=utf-8", Data)
+	})
+
+	r.POST("/EditPwd", func(c *gin.Context) {
+		var data EditPassword
+
+		// 绑定 JSON 请求体到 EditPassword 结构体
+		if err := c.ShouldBindJSON(&data); err != nil {
+			// 如果请求体有问题，返回 400 错误
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Invalid request data",
+			})
+			return
+		}
+		if data.NewPwd1 == "" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "新密码不能为空",
+			})
+			return
+		}
+		if data.NewPwd1 != data.NewPwd2 {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "两次输入密码不一致",
+			})
+			return
+		}
+		scuess, msg := utils.EditePassword(data.OldPwd, data.NewPwd1)
+		if scuess {
+			c.JSON(http.StatusOK, gin.H{
+				"message": "两次输入密码不一致",
+			})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": msg,
+			})
+		}
+	})
 	// 启动服务
 	r.Run(":8080")
 }

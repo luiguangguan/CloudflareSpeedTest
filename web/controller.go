@@ -205,3 +205,13 @@ func GetIPTraceInfos() []map[string]interface{} {
 	// 返回查询结果
 	return all
 }
+
+func GetIPs() string {
+	return utils.GetConfigFileContent()
+}
+
+// 保存IP信息
+func SaveIps(contents string, append bool) {
+	// IPFile
+	utils.WriteToFile(utils.GetConfigIpFilePath(), contents, "utf-8", append)
+}
