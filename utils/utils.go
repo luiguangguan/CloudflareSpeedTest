@@ -71,29 +71,6 @@ func TraceRoute(ip string) (string, error) {
 	return cleanOutput, nil
 }
 
-// func TraceRoute2(ip string) (string, error) {
-// 	// Configure traceroute options
-// 	options := traceroute.TracerouteOptions{
-// 		MaxHops:    30,  // Maximum hops
-// 		TimeoutMs:  500, // Timeout in milliseconds
-// 		PacketSize: 52,  // Packet size in bytes
-// 	}
-
-// 	// Perform the traceroute
-// 	results, err := traceroute.Traceroute(ip, &options)
-// 	if err != nil {
-// 		return "", fmt.Errorf("failed to perform traceroute to %s: %w", ip, err)
-// 	}
-
-// 	// Format the results
-// 	var builder strings.Builder
-// 	for _, hop := range results {
-// 		builder.WriteString(fmt.Sprintf("%2d  %s  %v\n", hop.TTL, hop.Address, hop.ElapsedTime))
-// 	}
-
-// 	return builder.String(), nil
-// }
-
 func TraceIP(ip string) {
 	atomic.AddInt32(&runningFunctions, 1) // 增加计数器
 	defer func() {
@@ -121,7 +98,7 @@ func TraceRouteIP() {
 	TraceRunning = true
 	for {
 		// whiile循環
-		Ips := GetAllIPNoneTrace()
+		Ips = GetAllIPNoneTrace()
 		IpIndex = 0
 		if Ips != nil {
 			for _, ip := range Ips {

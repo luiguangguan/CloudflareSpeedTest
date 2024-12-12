@@ -2,13 +2,20 @@ package web
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
 	"time"
 
+	"github.com/XIU2/CloudflareSpeedTest/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
+
+type SubmitData struct {
+	Action  string
+	content string
+}
 
 // WebSocket 升级器
 var upgrader = websocket.Upgrader{
@@ -88,6 +95,40 @@ func Start() {
 		c.JSON(200, GetIPTraceInfos())
 	})
 
+	r.POST("/IPs", func(c *gin.Context) {
+		var data SubmitData
+
+		// 绑定 JSON 请求体到 SubmitData 结构体
+		if err := c.ShouldBindJSON(&data); err != nil {
+			// 如果请求体有问题，返回 400 错误
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid request data",
+			})
+			return
+		}
+
+		// 根据 action 执行不同的操作
+		if data.Action == "overwrite" {
+			// 处理覆盖的逻辑
+			// 比如，将内容保存到文件或数据库等
+		} else if data.Action == "append" {
+			// 处理追加的逻辑
+			// 比如，将内容追加到文件或数据库等
+			log.Println("Handling append action")
+		} else {
+			// 如果 action 不符合要求，返回 400 错误
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Invalid action",
+			})
+			return
+		}
+
+		// 返回成功的响应
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Data submitted successfully",
+		})
+	})
+
 	// 启动服务
 	r.Run(":8080")
 }
@@ -155,6 +196,10 @@ func handleProcessConnection(conn *websocket.Conn) {
 			},
 			"AllDataCount": count,
 			"NextTime":     ts[0],
+			"TraceInfo": gin.H{
+				"Total": len(utils.Ips),
+				"Index": utils.IpIndex,
+			},
 		}
 
 		// 写入数据
