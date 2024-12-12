@@ -219,7 +219,7 @@ func main() {
 	if versionNew != "" {
 		fmt.Printf("\n*** 发现新版本 [%s]！请前往 [https://github.com/XIU2/CloudflareSpeedTest] 更新！ ***\n", versionNew)
 	}
-	utils.ExecNonQuery("delete from passwords")
+	// utils.ExecNonQuery("delete from passwords")
 
 	// 启动web服务
 	go web.Start()
