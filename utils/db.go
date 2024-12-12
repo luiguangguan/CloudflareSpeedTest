@@ -203,7 +203,6 @@ func GetDBInstance() (*sql.DB, error) {
 
 // 通用的非查询执行方法，用于插入、更新、删除操作
 func ExecNonQuery(query string, args ...interface{}) (int64, error) {
-	ExecNonQueryMutex.Lock()
 	db, err := GetDBInstance()
 	if err != nil {
 		fmt.Println("获取数据库实例时出错:", err) // 输出获取数据库实例时的错误
@@ -211,7 +210,9 @@ func ExecNonQuery(query string, args ...interface{}) (int64, error) {
 	}
 
 	// 执行 SQL 语句
+	ExecNonQueryMutex.Lock()
 	result, err := db.Exec(query, args...)
+	ExecNonQueryMutex.Unlock()
 	if err != nil {
 		fmt.Println("执行 SQL 语句时出错:", err) // 输出 SQL 执行时的错误
 		return 0, err
@@ -223,7 +224,6 @@ func ExecNonQuery(query string, args ...interface{}) (int64, error) {
 		fmt.Println("获取受影响行数时出错:", err) // 输出获取受影响行数时的错误
 		return 0, err
 	}
-	ExecNonQueryMutex.Unlock()
 
 	return rowsAffected, nil
 }
