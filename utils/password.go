@@ -1,7 +1,5 @@
 package utils
 
-import "time"
-
 func CheckPassword(pwd string) (sucess bool, pwdTotalCount int64) {
 
 	r, err := Scalar("select count(1) from Passwords")
@@ -31,7 +29,6 @@ func CheckPassword(pwd string) (sucess bool, pwdTotalCount int64) {
 
 func EditePassword(oldPwd string, newPwd string) (success bool, msg string) {
 	sucess, count := CheckPassword(oldPwd)
-	time.Sleep(time.Second * 1)
 	if sucess {
 		r, err := ExecNonQuery("insert into Passwords (pwd)values(?)", newPwd)
 		if r < 1 || err != nil {
