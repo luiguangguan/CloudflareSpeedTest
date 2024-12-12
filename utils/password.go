@@ -1,5 +1,7 @@
 package utils
 
+import "time"
+
 func CheckPassword(pwd string) (sucess bool, pwdTotalCount int64) {
 
 	r, err := Scalar("select count(1) from Passwords")
@@ -32,8 +34,9 @@ func EditePassword(oldPwd string, newPwd string) (success bool, msg string) {
 	if sucess {
 		r, err := ExecNonQuery("insert into Passwords (pwd)values(?)", newPwd)
 		if r < 1 || err != nil {
-			return false, "修改失败1" + err.Error()
+			return false, "修改失败1+" + err.Error()
 		}
+		time.Sleep(time.Second * 1)
 		if count > 0 {
 
 			r, err = ExecNonQuery("delete from Passwords where pwd=?", oldPwd)
