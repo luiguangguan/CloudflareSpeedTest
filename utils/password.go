@@ -32,7 +32,7 @@ func EditePassword(oldPwd string, newPwd string) (success bool, msg string) {
 	if sucess {
 		r, err := ExecNonQuery("insert into Passwords (pwd)values(?)", newPwd)
 		if r < 1 || err != nil {
-			return false, "修改失败1"
+			return false, "修改失败1" + err.Error()
 		}
 		if count > 0 {
 
