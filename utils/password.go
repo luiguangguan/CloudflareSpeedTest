@@ -30,15 +30,15 @@ func CheckPassword(pwd string) (sucess bool, pwdTotalCount int64) {
 func EditePassword(oldPwd string, newPwd string) (success bool, msg string) {
 	sucess, count := CheckPassword(oldPwd)
 	if sucess {
-		r, err := ExecNonQuery("Insert into Passwords (pwd)values(?)", newPwd)
+		r, err := ExecNonQuery("insert into Passwords (pwd)values(?)", newPwd)
 		if r < 1 || err != nil {
-			return false, "修改失败"
+			return false, "修改失败1"
 		}
 		if count > 0 {
 
 			r, err = ExecNonQuery("delete from Passwords where pwd=?", oldPwd)
 			if r < 1 || err != nil {
-				return false, "修改失败"
+				return false, "修改失败2"
 			} else {
 				return true, "修改成功"
 			}
