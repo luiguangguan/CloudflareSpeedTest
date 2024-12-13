@@ -215,3 +215,20 @@ func SaveIps(contents string, append bool) {
 	// IPFile
 	utils.WriteToFile(utils.GetConfigIpFilePath(), contents, "utf-8", append)
 }
+
+func ClearTracerInfo() (b bool, e string) {
+	_, err := utils.ExecNonQuery("delete from IpTraceInfos")
+	if err != nil {
+		return false, err.Error()
+	}
+	return true, ""
+}
+
+func TraceInfosCount() []map[string]interface{} {
+	data, err := utils.Select("select IP,count(*) Count from IpTraceInfos group by IP")
+	if err == nil {
+		return data
+
+	}
+	return nil
+}

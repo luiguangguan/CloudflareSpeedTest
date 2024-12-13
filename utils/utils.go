@@ -97,6 +97,9 @@ func TraceRouteIP() {
 	}()
 	TraceRunning = true
 	for {
+		if atomic.LoadInt32(&runningFunctions) > 0 {
+			continue
+		}
 		// whiile循環
 		Ips = GetAllIPNoneTrace()
 		IpIndex = 0

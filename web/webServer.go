@@ -17,6 +17,10 @@ type SubmitData struct {
 	Content  string
 }
 
+type Pwd struct {
+	Password string
+}
+
 type EditPassword struct {
 	OldPwd  string
 	NewPwd1 string
@@ -97,8 +101,42 @@ func Start() {
 		c.JSON(200, GetYesterdayMaxData())
 	})
 
+	r.GET("/TraceInfosCount", func(c *gin.Context) {
+		c.JSON(200, TraceInfosCount())
+	})
+
 	r.GET("/GetIPTraceInfos", func(c *gin.Context) {
 		c.JSON(200, GetIPTraceInfos())
+	})
+
+	r.POST("/ClearTracerInfo", func(c *gin.Context) {
+		var data Pwd
+
+		// 绑定 JSON 请求体到 SubmitData 结构体
+		if err := c.ShouldBindJSON(&data); err != nil {
+			// 如果请求体有问题，返回 400 错误
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Invalid request data",
+			})
+			return
+		}
+		b, _ := utils.CheckPassword(data.Password)
+		if b {
+			ok, e := ClearTracerInfo()
+			if ok {
+				c.JSON(200, gin.H{
+					"message": "删除成功",
+				})
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"message": "失败" + e,
+				})
+			}
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "密码错误",
+			})
+		}
 	})
 
 	// r.GET("/GetPwd", func(c *gin.Context) {
