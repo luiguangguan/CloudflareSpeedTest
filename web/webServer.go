@@ -102,7 +102,11 @@ func Start() {
 	})
 
 	r.GET("/TraceInfosCount", func(c *gin.Context) {
-		c.JSON(200, TraceInfosCount())
+		d1, alldata := TraceInfosCount()
+		c.JSON(200, gin.H{
+			"AllData": alldata,
+			"Count":   d1,
+		})
 	})
 
 	r.GET("/GetIPTraceInfos", func(c *gin.Context) {
