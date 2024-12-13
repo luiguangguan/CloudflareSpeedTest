@@ -110,6 +110,7 @@ func TraceRouteIP() {
 					time.Sleep(2 * time.Second) // 等待 1 秒钟
 				}
 				go TraceIP(ip) // 启动新的 goroutine 执行路由跟踪
+				fmt.Println("跟踪IP：" + ip)
 			}
 		}
 	}
