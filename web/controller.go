@@ -225,11 +225,8 @@ func ClearTracerInfo() (b bool, e string) {
 }
 
 func TraceInfosCount() (dataCount []map[string]interface{}, alldata []map[string]interface{}) {
-	data, err := utils.Select("select IP,count(*), Count from IpTraceInfos group by IP")
+	data, _ := utils.Select("select IP,count(*) Count from IpTraceInfos group by IP")
 	data2, _ := utils.Select("select * from IpTraceInfos")
-	if err == nil {
-		return data, data2
+	return data, data2
 
-	}
-	return nil, nil
 }
