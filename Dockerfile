@@ -27,6 +27,9 @@ RUN apk --no-cache add tzdata \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone
 
+# 安裝 traceroute 工具
+RUN apk --no-cache add traceroute
+
 # 設置字符編碼和時區（可選）
 ENV LANG=C.UTF-8
 ENV TZ=Asia/Shanghai
