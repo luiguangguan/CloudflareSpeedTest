@@ -144,14 +144,14 @@ func GetDBInstance() (*sql.DB, error) {
 		}
 
 		// 设置 WAL 模式
-		if _, err := dbInstance.Exec("PRAGMA journal_mode=WAL;"); err != nil {
-			fmt.Println("启用 WAL 模式失败:", err)
-			dbInstance.Close()
-			dbInstance = nil
-			return
-		} else {
-			fmt.Println("成功启用 WAL 模式")
-		}
+		// if _, err := dbInstance.Exec("PRAGMA journal_mode=WAL;"); err != nil {
+		// 	fmt.Println("启用 WAL 模式失败:", err)
+		// 	dbInstance.Close()
+		// 	dbInstance = nil
+		// 	return
+		// } else {
+		// 	fmt.Println("成功启用 WAL 模式")
+		// }
 
 		// 检查连接是否可用
 		if err = dbInstance.Ping(); err != nil {
