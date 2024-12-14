@@ -17,6 +17,11 @@ type SubmitData struct {
 	Content  string
 }
 
+type ConfigData struct {
+	Password string
+	Content  string
+}
+
 type Pwd struct {
 	Password string
 }
@@ -228,6 +233,51 @@ func Start() {
 			})
 		}
 	})
+
+	r.GET("/GetConfig", func(c *gin.Context) {
+		content, err := GetConfig()
+		var Data []byte
+		if err == nil {
+			Data = []byte(content)
+
+		} else {
+			Data = []byte(err.Error())
+		}
+		c.Data(http.StatusOK, "text/plain; charset=utf-8", Data)
+	})
+
+	r.POST("/SaveConfig", func(c *gin.Context) {
+		var data ConfigData
+
+		// 绑定 JSON 请求体到 EditPassword 结构体
+		if err := c.ShouldBindJSON(&data); err != nil {
+			// 如果请求体有问题，返回 400 错误
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Invalid request data",
+			})
+			return
+		}
+
+		b, _ := utils.CheckPassword(data.Password)
+		if !b {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Password Incorrect",
+			})
+			return
+		}
+		ok := SaveConfig(data.Content)
+		if ok {
+			c.JSON(http.StatusOK, gin.H{
+				"message": "保存成功，生效需要重启程序",
+			})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "保存失败",
+			})
+		}
+
+	})
+
 	// 启动服务
 	r.Run(":8080")
 }

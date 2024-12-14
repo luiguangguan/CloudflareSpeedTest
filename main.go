@@ -80,7 +80,7 @@ https://github.com/XIU2/CloudflareSpeedTest
     -h
         打印帮助说明
 `
-	var configFile string
+	// var configFile string
 	// for {
 	// 	utils.Test()
 	// 	time.Sleep(time.Second * 10)
@@ -89,7 +89,7 @@ https://github.com/XIU2/CloudflareSpeedTest
 	var minDelay, maxDelay, downloadTime int
 	var maxLossRate float64
 
-	flag.StringVar(&configFile, "c", "", "配置文件路径")
+	flag.StringVar(&utils.ConfigFile, "c", "", "配置文件路径")
 	flag.StringVar(&cronExpr, "cron", "", "计划任务")
 
 	fmt.Print("命令行读取参数")
@@ -125,10 +125,10 @@ https://github.com/XIU2/CloudflareSpeedTest
 	flag.Parse()
 
 	// 如果提供了 -c 参数，则读取配置文件
-	fmt.Print(configFile)
-	if configFile != "" {
-		if !utils.FileExists(configFile) {
-			utils.WriteToFile(configFile, `{
+	fmt.Print(utils.ConfigFile)
+	if utils.ConfigFile != "" {
+		if !utils.FileExists(utils.ConfigFile) {
+			utils.WriteToFile(utils.ConfigFile, `{
     "cron":"0 0 12,16,21,23 * * *",
     "f": "/data/IPlist.txt",
     "db":"/data/data.db",
@@ -142,7 +142,7 @@ https://github.com/XIU2/CloudflareSpeedTest
     "httping-code": 404
   }`, "utf8", false)
 		}
-		fileConfig, err := utils.LoadConfig(configFile)
+		fileConfig, err := utils.LoadConfig(utils.ConfigFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "加载配置文件出错: %v\n", err)
 			os.Exit(1)
@@ -155,7 +155,7 @@ https://github.com/XIU2/CloudflareSpeedTest
 
 	{
 		fmt.Println("命令行读取参数：")
-		fmt.Printf("配置文件路径 (-c): %s\n", configFile)
+		fmt.Printf("配置文件路径 (-c): %s\n", utils.ConfigFile)
 		fmt.Printf("计划任务 (-cron): %s\n", cronExpr)
 		fmt.Printf("延迟测速线程 (-n): %d\n", task.Routines)
 		fmt.Printf("延迟测速次数 (-t): %d\n", task.PingTimes)

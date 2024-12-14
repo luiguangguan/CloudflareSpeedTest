@@ -50,3 +50,17 @@ func FileExists(filePath string) bool {
 	_, err := os.Stat(filePath)
 	return !os.IsNotExist(err)
 }
+
+// 读取文件内容（UTF-8）
+func ReadFileUTF8(filepath string) (text string, err error) {
+	// 读取文件
+	content, err := os.ReadFile(filepath) // 使用传入的 filepath 参数
+	if err != nil {
+		// 错误处理
+		fmt.Println("读取文件失败:", err)
+		return "", err // 如果出错，返回空字符串和错误信息
+	}
+
+	// 成功读取文件，返回文件内容
+	return string(content), nil
+}

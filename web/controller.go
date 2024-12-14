@@ -210,6 +210,20 @@ func GetIPs() string {
 	return utils.GetConfigFileContent()
 }
 
+func GetConfig() (string, error) {
+	text, err := utils.ReadFileUTF8(utils.ConfigFile)
+	if err == nil {
+		return text, nil
+	} else {
+		return "", err
+	}
+}
+
+func SaveConfig(configText string) bool {
+	err := utils.WriteToFile(utils.ConfigFile, configText, "utf-8", false)
+	return err == nil
+}
+
 // 保存IP信息
 func SaveIps(contents string, append bool) {
 	// IPFile

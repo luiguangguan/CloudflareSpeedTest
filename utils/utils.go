@@ -17,6 +17,7 @@ var (
 	TraceRunning     = false
 	Ips              []string
 	IpIndex          int32
+	ConfigFile       = defaultDbFile // 数据文件路径
 	// saveTraceMutex   sync.Mutex
 )
 
