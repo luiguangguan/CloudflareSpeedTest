@@ -81,6 +81,10 @@ https://github.com/XIU2/CloudflareSpeedTest
         打印帮助说明
 `
 	var configFile string
+	// for {
+	// 	utils.Test()
+	// 	time.Sleep(time.Second * 10)
+	// }
 
 	var minDelay, maxDelay, downloadTime int
 	var maxLossRate float64

@@ -45,29 +45,64 @@ func GetScheduleTimes(expr string, count int) ([]time.Time, error) {
 	return times, nil
 }
 
+// func Test() string {
+// 	var cmd *exec.Cmd
+// 	// cmd = exec.Command("cmd", "/C", fmt.Sprintf("chcp 65001 >nul & tracert %s", "114.114.114.114"))
+// 	// cmd = exec.Command("cmd", "/C", fmt.Sprintf("chcp 65001 >nul & tracert -d -h 30 -w 5000 %s", "114.114.114.114"))
+// 	cmd = exec.Command("nexttrace", "-v")
+
+// 	// cmd = exec.Command("ping", "192.168.3.1")
+// 	err := cmd.Run()
+// 	// output, err := cmd.CombinedOutput()
+// 	// var stdout, stderr bytes.Buffer
+// 	// cmd.Stdout = &stdout // 标准输出
+// 	// cmd.Stderr = &stderr // 标准错误
+// 	// err := cmd.Run()
+// 	// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+// 	output, err := cmd.CombinedOutput()
+// 	if err != nil {
+// 		o := string(output)
+// 		// return outStr + errStr
+// 		return o
+// 	}
+// 	return ""
+// }
+
 // TraceRoute 函数，执行路由跟踪
 func TraceRoute(ip string) (string, error) {
 	var cmd *exec.Cmd
 
 	// 根据操作系统选择命令
-	if runtime.GOOS == "windows" {
-		// Windows 使用 tracert，并设置 chcp 65001 强制为 UTF-8 编码
-		cmd = exec.Command("cmd", "/C", fmt.Sprintf("chcp 65001 >nul & tracert %s", ip))
-	} else if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-		cmd = exec.Command("traceroute", ip) // Linux 和 macOS 使用 traceroute
+
+	cmd = exec.Command("nexttrace", "-v")
+	err := cmd.Run()
+	if err == nil {
+		//有nexttrace工具（可用）
+		cmd = exec.Command("nexttrace", ip)
 	} else {
-		return "", fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+		if runtime.GOOS == "windows" {
+			// Windows 使用 tracert，并设置 chcp 65001 强制为 UTF-8 编码
+			cmd = exec.Command("cmd", "/C", fmt.Sprintf("chcp 65001 >nul & tracert %s", ip))
+			// cmd = exec.Command("cmd", "/C", fmt.Sprintf("chcp 65001 >nul & tracert -d -h 30 -w 5000 %s", ip))
+		} else if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
+			cmd = exec.Command("traceroute", ip) // Linux 和 macOS 使用 traceroute
+		} else {
+			return "", fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+		}
 	}
 
 	// 执行命令
+	now := time.Now()
 	output, err := cmd.CombinedOutput()
+	t := time.Since(now).Seconds()
+	fmt.Printf("[%s]用时:%f秒\n", ip, t)
 	if err != nil {
 		return "", fmt.Errorf("failed to execute %s: %v\nOutput: %s", cmd.Path, err, string(output))
 	}
 
 	// 移除 Windows 命令中可能的额外空行
 	cleanOutput := strings.ReplaceAll(string(output), "\r\n", "\n")
-
+	fmt.Println(cleanOutput)
 	return cleanOutput, nil
 }
 

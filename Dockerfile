@@ -30,6 +30,13 @@ RUN apk --no-cache add tzdata \
 # 安裝 traceroute 工具
 RUN apk --no-cache add traceroute
 
+
+# 安裝 curl 工具
+RUN apk add --no-cache curl
+
+# 安裝 nxtrace 工具
+RUN curl -sSL nxtrace.org/nt | bash || echo "nxtrace installation failed, skipping."
+
 # 設置字符編碼和時區（可選）
 ENV LANG=C.UTF-8
 ENV TZ=Asia/Shanghai
