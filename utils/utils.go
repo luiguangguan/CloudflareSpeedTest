@@ -5,7 +5,6 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -18,7 +17,7 @@ var (
 	TraceRunning     = false
 	Ips              []string
 	IpIndex          int32
-	saveTraceMutex   sync.Mutex
+	// saveTraceMutex   sync.Mutex
 )
 
 const MaxConcurrent = 3 // 最大同时路由跟踪任务数
@@ -117,9 +116,9 @@ func TraceIP(ip string) {
 	if err == nil {
 		if result != "" {
 			// 加锁，确保只有一个线程在执行 SaveTrace
-			saveTraceMutex.Lock()
+			// saveTraceMutex.Lock()
 			row := SaveTrace(ip, result, "GZ")
-			saveTraceMutex.Unlock()
+			// saveTraceMutex.Unlock()
 			if row > 0 {
 				// fmt.Printf("保存成功\n")
 			}

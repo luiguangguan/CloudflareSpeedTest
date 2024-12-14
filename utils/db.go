@@ -14,12 +14,12 @@ const (
 )
 
 var (
-	dbInstance        *sql.DB         // 单例数据库实例
-	dbOnce            sync.Once       // 确保单例的创建只执行一次
-	dbErr             error           // 用于捕获数据库初始化错误
-	isFirstRun        bool            // 标记是否为首次运行
-	DbFile            = defaultDbFile // 数据文件路径
-	ExecNonQueryMutex sync.Mutex
+	dbInstance *sql.DB         // 单例数据库实例
+	dbOnce     sync.Once       // 确保单例的创建只执行一次
+	dbErr      error           // 用于捕获数据库初始化错误
+	isFirstRun bool            // 标记是否为首次运行
+	DbFile     = defaultDbFile // 数据文件路径
+	// ExecNonQueryMutex sync.Mutex
 )
 
 // 初始化表结构
@@ -137,14 +137,21 @@ func GetDBInstance() (*sql.DB, error) {
 		}
 
 		// 打开数据库连接
-		dbInstance, err = sql.Open("sqlite", DbFile) // 使用 "sqlite" 替代 "sqlite3"
+		dbInstance, err = sql.Open("sqlite", DbFile)
 		if err != nil {
 			fmt.Println("无法打开数据库连接:", err)
 			return
 		}
 
-		// result, err := dbInstance.Exec("PRAGMA journal_mode=WAL;")
-		// _, err := result.RowsAffected()
+		// 设置 WAL 模式
+		if _, err := dbInstance.Exec("PRAGMA journal_mode=WAL;"); err != nil {
+			fmt.Println("启用 WAL 模式失败:", err)
+			dbInstance.Close()
+			dbInstance = nil
+			return
+		} else {
+			fmt.Println("成功启用 WAL 模式")
+		}
 
 		// 检查连接是否可用
 		if err = dbInstance.Ping(); err != nil {
@@ -159,7 +166,6 @@ func GetDBInstance() (*sql.DB, error) {
 			dbInstance = nil
 			return
 		}
-		// 如果是首次运行，初始化数据
 		if _, err = dbInstance.Exec(createPasswordsTableSQL); err != nil {
 			fmt.Println("初始化表Passwords结构失败:", err)
 			dbInstance.Close()
@@ -203,7 +209,7 @@ func GetDBInstance() (*sql.DB, error) {
 
 // 通用的非查询执行方法，用于插入、更新、删除操作
 func ExecNonQuery(query string, args ...interface{}) (int64, error) {
-	defer ExecNonQueryMutex.Unlock()
+	// defer ExecNonQueryMutex.Unlock()
 
 	db, err := GetDBInstance()
 	if err != nil {
@@ -212,7 +218,7 @@ func ExecNonQuery(query string, args ...interface{}) (int64, error) {
 	}
 
 	// 执行 SQL 语句
-	ExecNonQueryMutex.Lock()
+	// ExecNonQueryMutex.Lock()
 	result, err := db.Exec(query, args...)
 	if err != nil {
 		fmt.Println("执行 SQL 语句时出错:", err) // 输出 SQL 执行时的错误
@@ -231,13 +237,13 @@ func ExecNonQuery(query string, args ...interface{}) (int64, error) {
 
 // 查询数据，返回结果集 []map[string]interface{}
 func Select(query string, args ...interface{}) ([]map[string]interface{}, error) {
-	defer ExecNonQueryMutex.Unlock()
+	// defer ExecNonQueryMutex.Unlock()
 
 	db, err := GetDBInstance()
 	if err != nil {
 		return nil, err
 	}
-	ExecNonQueryMutex.Lock()
+	// ExecNonQueryMutex.Lock()
 	rows, err := db.Query(query, args...)
 	if err != nil {
 		return nil, err
@@ -274,14 +280,14 @@ func Select(query string, args ...interface{}) ([]map[string]interface{}, error)
 
 // 查询一行一列的结果，返回一个值
 func Scalar(query string, args ...interface{}) (interface{}, error) {
-	defer ExecNonQueryMutex.Unlock()
+	// defer ExecNonQueryMutex.Unlock()
 	db, err := GetDBInstance()
 	if err != nil {
 		return nil, err
 	}
 
 	// 执行查询，获取结果
-	ExecNonQueryMutex.Lock()
+	// ExecNonQueryMutex.Lock()
 
 	row := db.QueryRow(query, args...)
 
