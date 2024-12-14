@@ -30,12 +30,13 @@ RUN apk --no-cache add tzdata \
 # 安裝 traceroute 工具
 RUN apk --no-cache add traceroute
 
-
 # 安裝 curl 工具
 RUN apk add --no-cache curl
 
-# 安裝 nxtrace 工具
-RUN curl -sSL nxtrace.org/nt | bash || echo "nxtrace installation failed, skipping."
+# 安裝 nxtrace 工具RUN curl -sSL nxtrace.org/nt | bash || echo "nxtrace installation failed, skipping."
+USER root
+RUN curl -sSL nxtrace.org/nt | bash > /app/nxtrace.install.log 2>&1 || echo "nxtrace installation failed, skipping." >> /app/nxtrace.install.log
+
 
 # 設置字符編碼和時區（可選）
 ENV LANG=C.UTF-8
@@ -62,6 +63,9 @@ RUN mkdir /config/
 
 # 複製默認配置文件到 /config 目錄
 COPY config.json /config/config.json
+
+# 添加当前时间到 versionDate.txt
+RUN date '+%Y-%m-%d %H:%M:%S' > /app/versionDate.txt
 
 # 設置可映射的配置和數據目錄
 VOLUME ["/config", "/data"]
