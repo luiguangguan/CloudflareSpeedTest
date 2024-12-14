@@ -37,7 +37,7 @@ RUN apk update
 RUN echo "Use apk update"
 RUN apk add --no-cache curl
 RUN echo "Install  curl"
-RUN apt-get --no-cache install -y bash
+RUN apt-add --no-cache install -y bash
 RUN echo "Install  bash"
 
 # 安裝 nxtrace 工具RUN curl -sSL nxtrace.org/nt | bash || echo "nxtrace installation failed, skipping."
