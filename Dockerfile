@@ -31,13 +31,17 @@ RUN apk --no-cache add tzdata \
 RUN apk --no-cache add traceroute
 
 USER root
-
+RUN echo "Use Root User"
 # 安裝 curl 工具
 RUN apk update
+RUN echo "Use apk update"
 RUN apk add --no-cache curl
+RUN echo "Install  curl"
 
 # 安裝 nxtrace 工具RUN curl -sSL nxtrace.org/nt | bash || echo "nxtrace installation failed, skipping."
 RUN curl -sSL nxtrace.org/nt | bash 
+RUN echo "Install  nxtrace"
+
 # > /app/nxtrace.install.log 2>&1 || echo "nxtrace installation failed, skipping." >> /app/nxtrace.install.log
 
 
