@@ -311,7 +311,7 @@ func handleProcessConnection(conn *websocket.Conn) {
 		writeMutex.Unlock()
 
 		// 控制推送速度
-		if currentDownload == totalDownload && currentDelay == totalDelay {
+		if (currentDownload == totalDownload && currentDelay == totalDelay) || len(utils.Ips) != int(utils.IpIndex) {
 			time.Sleep(1 * time.Second) // 推送间隔
 		} else {
 			time.Sleep(300 * time.Millisecond)
