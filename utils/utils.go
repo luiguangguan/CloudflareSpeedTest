@@ -80,6 +80,7 @@ func TraceRoute(ip string) (string, error) {
 		//有nexttrace工具（可用）
 		cmd = exec.Command("nexttrace", ip)
 	} else {
+		fmt.Print("使用传统跟踪工具\n")
 		if runtime.GOOS == "windows" {
 			// Windows 使用 tracert，并设置 chcp 65001 强制为 UTF-8 编码
 			cmd = exec.Command("cmd", "/C", fmt.Sprintf("chcp 65001 >nul & tracert %s", ip))
@@ -107,6 +108,7 @@ func TraceRoute(ip string) (string, error) {
 }
 
 func TraceIP(ip string) {
+	fmt.Println("跟踪IP：" + ip)
 	atomic.AddInt32(&runningFunctions, 1) // 增加计数器
 	defer func() {
 		atomic.AddInt32(&runningFunctions, -1) // 确保在函数结束时减少计数器
@@ -143,9 +145,9 @@ func TraceRouteIP() {
 				// 检查计数器，如果已经有太多任务在运行，则等待
 				for atomic.LoadInt32(&runningFunctions) >= MaxConcurrent {
 					time.Sleep(2 * time.Second) // 等待 1 秒钟
+					fmt.Printf("当前正在执行任务数量:%d,限制[%d]个任务\n", atomic.LoadInt32(&runningFunctions), MaxConcurrent)
 				}
 				go TraceIP(ip) // 启动新的 goroutine 执行路由跟踪
-				fmt.Println("跟踪IP：" + ip)
 			}
 		}
 	}

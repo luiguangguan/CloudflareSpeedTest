@@ -41,8 +41,8 @@ RUN apk add --no-cache bash
 RUN echo "Install  bash"
 
 # 安裝 nxtrace 工具RUN curl -sSL nxtrace.org/nt | bash || echo "nxtrace installation failed, skipping."
-RUN curl -sSL nxtrace.org/nt | bash 
-RUN echo "Install  nxtrace"
+# RUN curl -sSL nxtrace.org/nt | bash 
+# RUN echo "Install  nxtrace"
 
 # > /app/nxtrace.install.log 2>&1 || echo "nxtrace installation failed, skipping." >> /app/nxtrace.install.log
 
