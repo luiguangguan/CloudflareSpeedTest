@@ -109,7 +109,6 @@ func TraceRoute(ip string) (string, error) {
 
 func TraceIP(ip string) {
 	fmt.Println("跟踪IP：" + ip)
-	atomic.AddInt32(&runningFunctions, 1) // 增加计数器
 	defer func() {
 		atomic.AddInt32(&runningFunctions, -1) // 确保在函数结束时减少计数器
 		atomic.AddInt32(&IpIndex, 1)           // 添加已經處理IP的計數
@@ -147,7 +146,8 @@ func TraceRouteIP() {
 					time.Sleep(2 * time.Second) // 等待 1 秒钟
 					fmt.Printf("当前正在执行任务数量:%d,限制[%d]个任务\n", atomic.LoadInt32(&runningFunctions), MaxConcurrent)
 				}
-				go TraceIP(ip) // 启动新的 goroutine 执行路由跟踪
+				go TraceIP(ip)                        // 启动新的 goroutine 执行路由跟踪
+				atomic.AddInt32(&runningFunctions, 1) // 增加计数器
 			}
 		}
 	}
