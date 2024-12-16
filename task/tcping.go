@@ -23,6 +23,7 @@ var (
 	Routines      = defaultRoutines
 	TCPPort   int = defaultPort
 	PingTimes int = defaultPingTimes
+	Mu        sync.Mutex
 	DelayBar  *utils.Bar
 )
 
@@ -51,6 +52,21 @@ func checkPingDefault() {
 func NewPing() *Ping {
 	checkPingDefault()
 	ips2 := loadIPRanges()
+	DelayBar = utils.NewBar_httping(len(ips2), "可用:", "")
+	return &Ping{
+		wg: &sync.WaitGroup{},
+		m:  &sync.Mutex{},
+		// ips:     ips,
+		ips2:    ips2,
+		csv:     make(utils.PingDelaySet, 0),
+		control: make(chan bool, Routines),
+		bar:     DelayBar,
+	}
+}
+
+func NewPing2(ips2 []*IPPort) *Ping {
+	checkPingDefault()
+	// ips2 := loadIPRanges()
 	DelayBar = utils.NewBar_httping(len(ips2), "可用:", "")
 	return &Ping{
 		wg: &sync.WaitGroup{},

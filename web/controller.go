@@ -1,6 +1,7 @@
 package web
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/XIU2/CloudflareSpeedTest/task"
@@ -243,4 +244,39 @@ func TraceInfosCount() (dataCount []map[string]interface{}, alldata []map[string
 	data2, _ := utils.Select("select * from IpTraceInfos")
 	return data, data2
 
+}
+
+func TestHttpConnect(textip string, testDownload bool, password string) (ips []string, ok bool, msg string) {
+	b, _ := utils.CheckPassword(password)
+	if !b {
+		return []string{}, false, "密码错误"
+	}
+	if !task.Mu.TryLock() {
+		return []string{}, false, "有任务正在执行，请稍后"
+	}
+	defer task.Mu.Unlock()
+	ipPorts := task.TextToIP(textip)
+	// task.NewPing2(ipPorts).Run().FilterDelay().FilterDelay()
+	pingData := task.NewPing2(ipPorts).Run().FilterDelay().FilterLossRate()
+	count := len(pingData)
+	if count > 0 {
+		if testDownload {
+			speedData := task.TestDownloadSpeed(pingData)
+			count := len(speedData)
+			if count > 0 {
+				ips := make([]string, count)
+				for index, item := range pingData {
+					ips[index] = (item.IP.String() + "#" + strconv.Itoa(item.Port) + "#" + item.Remark)
+				}
+				return ips, true, ""
+			}
+		} else {
+			ips := make([]string, count)
+			for index, item := range pingData {
+				ips[index] = (item.IP.String() + "#" + strconv.Itoa(item.Port) + "#" + item.Remark)
+			}
+			return ips, true, ""
+		}
+	}
+	return []string{}, true, ""
 }

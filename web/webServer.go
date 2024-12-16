@@ -11,27 +11,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type SubmitData struct {
-	Password string
-	Action   string
-	Content  string
-}
-
-type ConfigData struct {
-	Password string
-	Content  string
-}
-
-type Pwd struct {
-	Password string
-}
-
-type EditPassword struct {
-	OldPwd  string
-	NewPwd1 string
-	NewPwd2 string
-}
-
 // WebSocket 升级器
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -232,6 +211,31 @@ func Start() {
 				"message": msg,
 			})
 		}
+	})
+	r.POST("/TestHttpConnect", func(c *gin.Context) {
+		var data TestHttpConnectData
+
+		// 绑定 JSON 请求体到 EditPassword 结构体
+		if err := c.ShouldBindJSON(&data); err != nil {
+			// 如果请求体有问题，返回 400 错误
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Invalid request data",
+			})
+			return
+		}
+		ips, ok, msg := TestHttpConnect(data.IpText, data.TestDownload, data.Password)
+		if ok {
+			c.JSON(http.StatusOK, gin.H{
+				"message": msg,
+				"ips":     ips,
+			})
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": msg,
+				"ips":     ips,
+			})
+		}
+
 	})
 
 	r.GET("/GetConfig", func(c *gin.Context) {

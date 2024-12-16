@@ -215,3 +215,47 @@ func loadIPRanges() []*IPPort {
 	}
 	return ranges.ips2
 }
+
+// ////////////////////////////////////////////////////////////////
+func TextToIP(ipText string) []*IPPort {
+	if ipText != "" {
+		ranges := newIPRanges()
+
+		text := strings.ReplaceAll(ipText, "\r\n", "\n")
+
+		// 按 \n 分割字符串
+		lines := strings.Split(text, "\n")
+		for _, line := range lines {
+			if line == "" { // 跳过空行
+				continue
+			}
+			// 按 `#` 分割字符串
+			parts := strings.Split(line, "#")
+			var port int = 0 // 端口号
+			var remark string = ""
+			// 假设 `parts` 是字符串数组
+			var err error // 在外部声明 err
+
+			// 判断长度是否大于 1
+			if len(parts) > 1 {
+				// 将第二个元素转换为 int
+				port, err = strconv.Atoi(parts[1])
+				if err != nil {
+					//.Println("转换失败:", err)
+					port = 0
+				}
+			}
+			if len(parts) > 2 {
+				remark = parts[2]
+			}
+			ranges.parseCIDR(parts[0]) // 解析 IP 段，获得 IP、IP 范围、子网掩码
+			if isIPv4(line) {          // 生成要测速的所有 IPv4 / IPv6 地址（单个/随机/全部）
+				ranges.chooseIPv4(port, remark)
+			} else {
+				ranges.chooseIPv6(port, remark)
+			}
+		}
+		return ranges.ips2
+	}
+	return nil
+}

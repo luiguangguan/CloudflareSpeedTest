@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"sync"
 	"time"
 
 	"github.com/XIU2/CloudflareSpeedTest/task"
@@ -21,7 +20,6 @@ var (
 	// cronExpr := "*/1 * * * *" // 每 1 分钟执行一次
 	cronExpr string
 	// 定义全局互斥锁
-	mu sync.Mutex
 )
 
 func init() {
@@ -312,9 +310,10 @@ func main() {
 
 func TestSpeed() {
 	// 加锁，确保同一时间只有一个任务在执行
-	mu.Lock()
-	defer mu.Unlock()
+	task.Mu.Lock()
+	defer task.Mu.Unlock()
 	// 开始延迟测速 + 过滤延迟/丢包 返回 []CloudflareIPData
+
 	pingData := task.NewPing().Run().FilterDelay().FilterLossRate()
 	// 开始下载测速
 	if len(pingData) > 0 {
