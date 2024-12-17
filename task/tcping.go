@@ -28,13 +28,14 @@ var (
 )
 
 type Ping struct {
-	wg      *sync.WaitGroup
-	m       *sync.Mutex
-	ips     []*net.IPAddr
-	ips2    []*IPPort
-	csv     utils.PingDelaySet
-	control chan bool
-	bar     *utils.Bar
+	wg             *sync.WaitGroup
+	m              *sync.Mutex
+	ips            []*net.IPAddr
+	ips2           []*IPPort
+	csv            utils.PingDelaySet
+	control        chan bool
+	bar            *utils.Bar
+	ContainsFailed bool
 }
 
 func checkPingDefault() {
@@ -64,7 +65,7 @@ func NewPing() *Ping {
 	}
 }
 
-func NewPing2(ips2 []*IPPort) *Ping {
+func NewPing2(ips2 []*IPPort, containsFailed bool) *Ping {
 	checkPingDefault()
 	// ips2 := loadIPRanges()
 	DelayBar = utils.NewBar_httping(len(ips2), "可用:", "")
@@ -72,10 +73,11 @@ func NewPing2(ips2 []*IPPort) *Ping {
 		wg: &sync.WaitGroup{},
 		m:  &sync.Mutex{},
 		// ips:     ips,
-		ips2:    ips2,
-		csv:     make(utils.PingDelaySet, 0),
-		control: make(chan bool, Routines),
-		bar:     DelayBar,
+		ips2:           ips2,
+		csv:            make(utils.PingDelaySet, 0),
+		control:        make(chan bool, Routines),
+		bar:            DelayBar,
+		ContainsFailed: containsFailed,
 	}
 }
 
@@ -166,16 +168,29 @@ func (p *Ping) tcpingHandler(ip *net.IPAddr, port int, remark string) {
 		nowAble++
 	}
 	p.bar.Grow(1, strconv.Itoa(nowAble))
-	if recv == 0 {
+	if recv == 0 && !p.ContainsFailed {
 		return
 	}
-	data := &utils.PingData{
-		IP:       ip,
-		Sended:   PingTimes,
-		Received: recv,
-		Delay:    totalDlay / time.Duration(recv),
-		Port:     port,
-		Remark:   remark,
+	var data *utils.PingData
+	if recv == 0 {
+		data = &utils.PingData{
+			IP:       ip,
+			Sended:   PingTimes,
+			Received: recv,
+			Delay:    totalDlay / time.Duration(1),
+			Port:     port,
+			Remark:   remark,
+		}
+	} else {
+		data = &utils.PingData{
+			IP:       ip,
+			Sended:   PingTimes,
+			Received: recv,
+			Delay:    totalDlay / time.Duration(recv),
+			Port:     port,
+			Remark:   remark,
+		}
 	}
+
 	p.appendIPData(data)
 }
